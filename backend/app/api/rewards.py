@@ -1,0 +1,174 @@
+"""Reward shop API routes."""
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, and_
+
+from ..core.database import get_db
+from ..core.auth import get_current_user, get_current_parent
+from ..models.user import User
+from ..models.reward import Reward, RewardRedemption
+from ..schemas.reward import RewardCreate, RewardResponse, RedemptionResponse
+
+router = APIRouter(prefix="/rewards", tags=["rewards"])
+
+
+@router.post("", response_model=RewardResponse)
+async def create_reward(
+    data: RewardCreate,
+    current_user: User = Depends(get_current_parent),
+    db: AsyncSession = Depends(get_db),
+):
+    """Parent creates a reward."""
+    reward = Reward(
+        family_id=current_user.family_id,
+        created_by_id=current_user.id,
+        **data.model_dump(),
+    )
+    db.add(reward)
+    await db.commit()
+    await db.refresh(reward)
+    return RewardResponse.model_validate(reward)
+
+
+@router.get("", response_model=list[RewardResponse])
+async def get_rewards(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Get all rewards for the family."""
+    result = await db.execute(
+        select(Reward).where(
+            and_(Reward.family_id == current_user.family_id, Reward.is_active == True)
+        )
+    )
+    rewards = result.scalars().all()
+    return [RewardResponse.model_validate(r) for r in rewards]
+
+
+@router.delete("/{reward_id}")
+async def delete_reward(
+    reward_id: int,
+    current_user: User = Depends(get_current_parent),
+    db: AsyncSession = Depends(get_db),
+):
+    """Deactivate a reward."""
+    result = await db.execute(
+        select(Reward).where(
+            and_(Reward.id == reward_id, Reward.family_id == current_user.family_id)
+        )
+    )
+    reward = result.scalar_one_or_none()
+    if not reward:
+        raise HTTPException(status_code=404, detail="Reward not found")
+    reward.is_active = False
+    await db.commit()
+    return {"message": "Reward deleted"}
+
+
+@router.post("/{reward_id}/redeem", response_model=RedemptionResponse)
+async def redeem_reward(
+    reward_id: int,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """A child redeems a reward from the shop."""
+    if current_user.role != "child":
+        raise HTTPException(status_code=403, detail="Only children can redeem rewards")
+
+    result = await db.execute(
+        select(Reward).where(and_(Reward.id == reward_id, Reward.is_active == True))
+    )
+    reward = result.scalar_one_or_none()
+    if not reward:
+        raise HTTPException(status_code=404, detail="Reward not found")
+    if reward.family_id != current_user.family_id:
+        raise HTTPException(status_code=403, detail="Not in your family")
+
+    # Check age restrictions
+    if reward.age_min and current_user.age_tier and current_user.age_tier < reward.age_min:
+        raise HTTPException(status_code=403, detail="You're not old enough for this reward")
+    if reward.age_max and current_user.age_tier and current_user.age_tier > reward.age_max:
+        raise HTTPException(status_code=403, detail="You've outgrown this reward")
+
+    # Check weekly limit
+    if reward.limit_per_week > 0:
+        # Count this week's redemptions for this child
+        from datetime import date, timedelta
+        today = date.today()
+        week_start = today - timedelta(days=today.weekday())
+        weekly_count = await db.execute(
+            select(RewardRedemption).where(
+                and_(
+                    RewardRedemption.reward_id == reward_id,
+                    RewardRedemption.child_id == current_user.id,
+                    RewardRedemption.redeemed_at >= week_start,
+                )
+            )
+        )
+        if len(weekly_count.scalars().all()) >= reward.limit_per_week:
+            raise HTTPException(status_code=403, detail="Weekly limit reached for this reward")
+
+    # Check balance
+    if reward.cost_stars > current_user.stars:
+        raise HTTPException(status_code=403, detail="Not enough stars")
+    if reward.cost_gems > current_user.gems:
+        raise HTTPException(status_code=403, detail="Not enough gems")
+
+    # Deduct and create redemption
+    current_user.stars -= reward.cost_stars
+    current_user.gems -= reward.cost_gems
+
+    redemption = RewardRedemption(
+        reward_id=reward_id,
+        child_id=current_user.id,
+        status="approved" if not reward.requires_approval else "pending",
+    )
+    db.add(redemption)
+    await db.commit()
+    await db.refresh(redemption)
+
+    return RedemptionResponse.model_validate(redemption)
+
+
+@router.get("/redemptions", response_model=list[RedemptionResponse])
+async def get_redemptions(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+    child_id: int | None = None,
+):
+    """Get reward redemptions. Parents see all; children see their own."""
+    if current_user.role == "parent":
+        query = select(RewardRedemption).where(
+            RewardRedemption.reward.has(Reward.family_id == current_user.family_id)
+        )
+        if child_id:
+            query = query.where(RewardRedemption.child_id == child_id)
+    else:
+        query = select(RewardRedemption).where(RewardRedemption.child_id == current_user.id)
+
+    result = await db.execute(query.order_by(RewardRedemption.redeemed_at.desc()))
+    redemptions = result.scalars().all()
+    return [RedemptionResponse.model_validate(r) for r in redemptions]
+
+
+@router.post("/redemptions/{redemption_id}/approve", response_model=RedemptionResponse)
+async def approve_redemption(
+    redemption_id: int,
+    current_user: User = Depends(get_current_parent),
+    db: AsyncSession = Depends(get_db),
+):
+    """Parent approves or fulfills a redemption."""
+    result = await db.execute(select(RewardRedemption).where(RewardRedemption.id == redemption_id))
+    redemption = result.scalar_one_or_none()
+    if not redemption:
+        raise HTTPException(status_code=404, detail="Redemption not found")
+    if redemption.reward.family_id != current_user.family_id:
+        raise HTTPException(status_code=403, detail="Not in your family")
+
+    from datetime import datetime, timezone
+    redemption.status = "fulfilled"
+    redemption.fulfilled_at = datetime.now(timezone.utc)
+    await db.commit()
+    await db.refresh(redemption)
+    return RedemptionResponse.model_validate(redemption)
