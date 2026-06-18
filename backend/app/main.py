@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .core.config import settings
 from .core.database import create_tables
 from .models import User, Family, TaskTemplate, TaskInstance, Reward, RewardRedemption, StreakHistory, Achievement, ChildAchievement  # noqa: F401
-from .api import auth, tasks, rewards, leaderboard
+from .api import auth, tasks, rewards, leaderboard, achievements
 
 
 @asynccontextmanager
@@ -37,6 +37,7 @@ app.include_router(auth.router, prefix="/api/v1")
 app.include_router(tasks.router, prefix="/api/v1")
 app.include_router(rewards.router, prefix="/api/v1")
 app.include_router(leaderboard.router, prefix="/api/v1")
+app.include_router(achievements.router, prefix="/api/v1")
 
 
 @app.get("/api/v1/health")

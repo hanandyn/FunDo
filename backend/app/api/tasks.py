@@ -185,21 +185,59 @@ async def complete_task(
     instance.penalty_points = abs(scoring.get("overstay_penalty", 0)) if scoring.get("overstay_penalty", 0) < 0 else 0
 
     # Update child's stats
+    gems_earned = 0
+    leveled_up = False
+    new_level = None
+    new_achievements = []
+    
     if child:
+        old_level = child.level
         child.stars += scoring["total"]
         # Also award XP
         xp_gained = scoring["total"]
         child.xp += xp_gained
         child.level = calculate_level_from_xp(child.xp)
+        
+        # Track completions for chest and achievements
+        child.total_tasks_completed = (child.total_tasks_completed or 0) + 1
+        child.completed_since_last_chest = (child.completed_since_last_chest or 0) + 1
+        
+        # Award gems on level-up
+        if child.level > old_level:
+            gems_earned = child.level - old_level  # 1 gem per level gained
+            child.gems += gems_earned
+            leveled_up = True
+            new_level = child.level
 
     # Update streak
     if child:
         await update_streak_on_completion(db, child)
 
+    # Check achievements
+    if child:
+        from ..services.achievements import check_and_award_achievements
+        timed_under_5 = (
+            template.task_type == "timed"
+            and data.elapsed_seconds is not None
+            and data.elapsed_seconds < 300
+        )
+        new_achievements = await check_and_award_achievements(
+            db, child,
+            scoring_result=scoring,
+            task_type=template.task_type,
+            timed_under_5min=timed_under_5,
+        )
+
     await db.commit()
     await db.refresh(instance)
 
-    return TaskInstanceResponse.model_validate(instance)
+    resp = TaskInstanceResponse.model_validate(instance)
+    resp.gems_earned = gems_earned
+    resp.leveled_up = leveled_up
+    resp.new_level = new_level
+    resp.new_achievements = new_achievements if new_achievements else None
+    resp.chest_available = child.completed_since_last_chest >= 10 if child else False
+    return resp
 
 
 @router.post("/instances/{instance_id}/approve", response_model=TaskInstanceResponse)

@@ -81,6 +81,12 @@ class TaskInstanceResponse(BaseModel):
     parent_approved_at: Optional[datetime] = None
     notes: Optional[str] = None
     template: Optional[TaskTemplateResponse] = None
+    # Phase 2 extras
+    gems_earned: Optional[int] = None
+    leveled_up: Optional[bool] = None
+    new_level: Optional[int] = None
+    new_achievements: Optional[list[dict]] = None
+    chest_available: Optional[bool] = None
 
     model_config = {"from_attributes": True}
 

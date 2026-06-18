@@ -30,6 +30,9 @@ class User(Base):
     avatar_config = Column(String, nullable=True)  # JSON string
     theme_preference = Column(String, nullable=True)
     handicap_multiplier = Column(Integer, default=100)  # percentage, 100 = no handicap
+    last_daily_spin = Column(DateTime(timezone=True), nullable=True)
+    completed_since_last_chest = Column(Integer, default=0)
+    total_tasks_completed = Column(Integer, default=0)  # denormalized for achievement tracking
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 

@@ -36,6 +36,9 @@ class UserUpdate(BaseModel):
     avatar_config: Optional[str] = None
     theme_preference: Optional[str] = None
     handicap_multiplier: Optional[int] = None
+    last_daily_spin: Optional[datetime] = None
+    completed_since_last_chest: Optional[int] = None
+    total_tasks_completed: Optional[int] = None
 
 
 class UserResponse(BaseModel):
@@ -56,6 +59,9 @@ class UserResponse(BaseModel):
     avatar_config: Optional[str] = None
     theme_preference: Optional[str] = None
     handicap_multiplier: int
+    last_daily_spin: Optional[datetime] = None
+    completed_since_last_chest: int
+    total_tasks_completed: int
     created_at: Optional[datetime] = None
 
     model_config = {"from_attributes": True}
