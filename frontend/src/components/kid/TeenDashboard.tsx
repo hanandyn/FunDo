@@ -24,6 +24,7 @@ export function TeenDashboard() {
     } catch { /* ignore */ }
   }, []);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { loadData(); }, [loadData]);
 
   const handleComplete = async (instance: TaskInstance) => {

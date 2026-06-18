@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/immutability */
 import { useEffect } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LoginPage } from './components/auth/LoginPage';

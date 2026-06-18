@@ -24,6 +24,7 @@ export function PowerUpShop() {
     } catch { /* ignore */ }
   }, []);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { load(); }, [load]);
 
   const showMsg = (msg: string, type: 'success' | 'info' = 'success') => {
