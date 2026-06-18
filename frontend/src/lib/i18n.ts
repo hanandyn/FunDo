@@ -1,134 +1,43 @@
-const translations: Record<string, Record<string, string>> = {
-  en: {
-    login: 'Login',
-    username: 'Username',
-    password: 'Password',
-    register: 'Register',
-    parent: 'Parent',
-    child: 'Child',
-    dashboard: 'Dashboard',
-    quests: 'Quests',
-    shop: 'Reward Shop',
-    leaderboard: 'Leaderboard',
-    profile: 'Profile',
-    logout: 'Logout',
-    'create.task': 'Create Task',
-    'create.reward': 'Create Reward',
-    'create.child': 'Add Child',
-    points: 'points',
-    stars: 'Stars',
-    gems: 'Gems',
-    streak: 'Streak',
-    level: 'Level',
-    'task.complete': 'Complete Task',
-    'task.start': 'Start',
-    'task.timer': 'Timer',
-    'reward.redeem': 'Redeem',
-    'reward.cost': 'Cost',
-    'done': "I'M DONE! 🎉",
-    'timer.start': 'Start Timer',
-    'timer.remaining': 'remaining',
-    'congratulations': 'Congratulations! 🎉',
-    'you.earned': 'You earned',
-    'keep.going': 'Keep going!',
-    'no.tasks': 'No tasks for today! Enjoy your free time 🌟',
-    'parent.dashboard': 'Parent Dashboard',
-    'child.dashboard': 'My Quests',
-    'my.children': 'My Children',
-    'add.child': 'Add Child',
-    'child.name': 'Child Name',
-    'age.tier': 'Age Tier',
-    'task.name': 'Task Name',
-    'task.type': 'Task Type',
-    'base.points': 'Base Points',
-    'timer.duration': 'Timer Duration (seconds)',
-    'max.asks': 'Max Asks',
-    'first.ask.bonus': 'First Ask Bonus',
-    'penalty.per.ask': 'Penalty Per Ask',
-    'early.bonus': 'Early Finish Bonus/min',
-    'overstay.penalty': 'Overstay Penalty/min',
-    'schedule': 'Schedule',
-    'daily': 'Daily',
-    'weekly': 'Weekly',
-    'weekdays': 'Weekdays',
-    'one_shot': 'One Shot',
-    'timed': 'Timed',
-    'checklist': 'Checklist',
-    'bonus': 'Bonus',
-    'reward.name': 'Reward Name',
-    'reward.description': 'Description',
-    'cost.stars': 'Cost (Stars)',
-    'cost.gems': 'Cost (Gems)',
-    'requires.approval': 'Requires Approval',
-    'redeem': 'Redeem',
-    'confirm.redeem': 'Are you sure you want to redeem this reward?',
-    'not.enough.stars': 'Not enough stars!',
-    'redemption.pending': 'Pending approval',
-    'redemption.approved': 'Approved!',
-    'family.leaderboard': 'Family Leaderboard',
-    'current.streak': 'Current Streak',
-    'longest.streak': 'Longest Streak',
-  },
-  he: {
-    login: 'התחברות',
-    username: 'שם משתמש',
-    password: 'סיסמה',
-    register: 'הרשמה',
-    parent: 'הורה',
-    child: 'ילד/ה',
-    dashboard: 'לוח בקרה',
-    quests: 'משימות',
-    shop: 'חנות פרסים',
-    leaderboard: 'טבלת מובילים',
-    profile: 'פרופיל',
-    logout: 'התנתקות',
-    'create.task': 'צור משימה',
-    'create.reward': 'צור פרס',
-    'create.child': 'הוסף ילד/ה',
-    points: 'נקודות',
-    stars: 'כוכבים',
-    gems: 'יהלומים',
-    streak: 'רצף',
-    level: 'רמה',
-    'task.complete': 'השלם משימה',
-    'task.start': 'התחל',
-    'task.timer': 'טיימר',
-    'reward.redeem': 'פדה',
-    'reward.cost': 'מחיר',
-    'done': 'סיימתי! 🎉',
-    'timer.start': 'התחל טיימר',
-    'timer.remaining': 'נותר',
-    'congratulations': 'כל הכבוד! 🎉',
-    'you.earned': 'הרווחת',
-    'keep.going': 'המשך כך!',
-    'no.tasks': 'אין משימות להיום! תהנה מהזמן הפנוי 🌟',
-    'parent.dashboard': 'לוח בקרת הורים',
-    'child.dashboard': 'המשימות שלי',
-    'my.children': 'הילדים שלי',
-    'add.child': 'הוסף ילד/ה',
-    'child.name': 'שם הילד/ה',
-    'age.tier': 'שכבת גיל',
-    'task.name': 'שם המשימה',
-    'task.type': 'סוג משימה',
-    'base.points': 'נקודות בסיס',
-    'timer.duration': 'משך טיימר (שניות)',
-    'not.enough.stars': 'אין מספיק כוכבים!',
-    'family.leaderboard': 'טבלת המשפחה',
-    'current.streak': 'רצף נוכחי',
-    'longest.streak': 'הרצף הכי ארוך',
-  },
+import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
+import LanguageDetector from 'i18next-browser-languagedetector';
+import en from '../locales/en.json';
+import he from '../locales/he.json';
+
+export const SUPPORTED_LANGUAGES: Array<{ code: string; name: string; dir: 'ltr' | 'rtl' }> = [
+  { code: 'en', name: 'English', dir: 'ltr' as const },
+  { code: 'he', name: 'עברית', dir: 'rtl' as const },
+];
+
+const detectionOptions = {
+  order: ['localStorage', 'navigator'],
+  lookupLocalStorage: 'questkids_lang',
+  caches: ['localStorage'],
 };
 
-const defaultLocale = 'en';
+i18n
+  .use(LanguageDetector)
+  .use(initReactI18next)
+  .init({
+    resources: {
+      en: { translation: en },
+      he: { translation: he },
+    },
+    fallbackLng: 'en',
+    detection: detectionOptions,
+    interpolation: {
+      escapeValue: false,
+    },
+  });
 
-export function t(key: string, locale: string = defaultLocale): string {
-  return translations[locale]?.[key] || translations[defaultLocale]?.[key] || key;
+export function getLanguageDir(): 'ltr' | 'rtl' {
+  const lang = SUPPORTED_LANGUAGES.find(l => l.code === i18n.language);
+  return (lang?.dir as 'ltr' | 'rtl') || 'ltr';
 }
 
-export function getLocale(): string {
-  return localStorage.getItem('locale') || defaultLocale;
+export function setLanguageDirection(dir: 'ltr' | 'rtl') {
+  document.documentElement.dir = dir;
+  document.documentElement.lang = i18n.language;
 }
 
-export function setLocale(locale: string) {
-  localStorage.setItem('locale', locale);
-}
+export default i18n;

@@ -1,6 +1,22 @@
 @import "tailwindcss";
+@import "./styles/accessibility.css";
 
 @theme {
+  --color-quest-blue: #4A90D9;
+  --color-quest-green: #52C41A;
+  --color-quest-yellow: #FADB14;
+  --color-quest-orange: #FA8C16;
+  --color-quest-red: #FF4D4F;
+  --color-quest-purple: #722ED1;
+  --color-quest-pink: #EB2F96;
+  --color-quest-gold: #FFD700;
+  --color-quest-gem: #00D2FF;
+  --color-quest-bg: #FFF9E6;
+  --color-quest-card: #FFFFFF;
+  --color-quest-dark: #1A1A2E;
+}
+
+:root {
   --color-quest-blue: #4A90D9;
   --color-quest-green: #52C41A;
   --color-quest-yellow: #FADB14;
@@ -68,6 +84,14 @@ body {
   background-color: #e04345;
 }
 
+.btn-purple {
+  background-color: var(--color-quest-purple);
+  color: white;
+}
+.btn-purple:hover {
+  background-color: #5a1fa8;
+}
+
 .btn-gold {
   background-color: var(--color-quest-gold);
   color: var(--color-quest-dark);
@@ -94,8 +118,9 @@ body {
 }
 
 /* RTL Support */
-[dir="rtl"] {
+[dir="rtl"] body {
   text-align: right;
+  direction: rtl;
 }
 
 /* Animations */

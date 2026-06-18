@@ -1,10 +1,22 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
+import './lib/i18n'; // Initialize i18next
+import { setLanguageDirection } from './lib/i18n';
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+function Root() {
+  useEffect(() => {
+    // Set initial direction
+    const dir = localStorage.getItem('questkids_lang') === 'he' ? 'rtl' : 'ltr';
+    setLanguageDirection(dir);
+  }, []);
+
+  return (
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')!).render(<Root />);

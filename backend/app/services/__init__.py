@@ -17,3 +17,10 @@ from .family_goals import (
 from .cheers import send_cheer, get_received_cheers, get_today_cheer_count
 from .tips_engine import generate_tips
 from .weekly_recap import generate_weekly_recap, generate_kid_recap
+from .powerups import (
+    seed_powerups, get_all_powerups, get_active_powerups,
+    purchase_powerup, apply_powerup_effect, get_applied_multipliers,
+)
+from .scheduling import (
+    get_next_occurrences, generate_instances_for_week, is_scheduled_today,
+)

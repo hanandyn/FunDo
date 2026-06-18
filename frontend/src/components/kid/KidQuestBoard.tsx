@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import { api } from '../../lib/api';
 import type { TaskInstance, Reward, SpinResult, ChestResult } from '../../lib/types';
@@ -13,10 +14,12 @@ import { EnhancedLeaderboard } from './EnhancedLeaderboard';
 import { FamilyGoalKidCard } from './FamilyGoals';
 import { KidWeeklyRecap } from './WeeklyRecap';
 import { CheerNotification } from './CheerSystem';
+import { PowerUpShop } from './PowerUpShop';
+import { SettingsPanel } from '../settings/SettingsPanel';
 import { useCheers } from '../../lib/useCheers';
 import * as sounds from '../../lib/sounds';
 
-type ViewType = 'quests' | 'shop' | 'leaderboard' | 'achievements' | 'profile';
+type ViewType = 'quests' | 'shop' | 'leaderboard' | 'achievements' | 'powerups' | 'settings';
 
 interface TaskCompleteExtras {
   gems_earned?: number;
@@ -27,6 +30,7 @@ interface TaskCompleteExtras {
 }
 
 export function KidQuestBoard() {
+  const { t } = useTranslation();
   const { user, logout } = useAuth();
   const [instances, setInstances] = useState<TaskInstance[]>([]);
   const [rewards, setRewards] = useState<Reward[]>([]);
@@ -354,10 +358,12 @@ export function KidQuestBoard() {
         {/* Bottom Nav */}
         <div className="flex gap-2 mb-6 justify-center flex-wrap">
           {([
-            ['quests', '⚔️ Quests'],
-            ['shop', '🛒 Shop'],
-            ['leaderboard', '🏆 Board'],
-            ['achievements', '🏅 Badges'],
+            ['quests', '⚔️ ' + t('nav.quests')],
+            ['shop', '🛒 ' + t('nav.shop')],
+            ['powerups', '⚡ ' + t('nav.powerups')],
+            ['leaderboard', '🏆 ' + t('nav.leaderboard')],
+            ['achievements', '🏅 ' + t('nav.achievements')],
+            ['settings', '⚙️ ' + t('nav.settings')],
           ] as [ViewType, string][]).map(([view, label]) => (
             <button
               key={view}
@@ -596,6 +602,12 @@ export function KidQuestBoard() {
             </div>
           </div>
         )}
+
+        {/* Power-Ups Shop View */}
+        {activeView === 'powerups' && <PowerUpShop />}
+
+        {/* Settings View */}
+        {activeView === 'settings' && <SettingsPanel onClose={() => setActiveView('quests')} />}
 
         {/* Leaderboard View */}
         {activeView === 'leaderboard' && <EnhancedLeaderboard />}

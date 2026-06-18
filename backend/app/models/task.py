@@ -34,10 +34,15 @@ class TaskTemplate(Base):
     overstay_penalty_per_min = Column(Integer, default=-5)
     
     # Schedule
-    schedule_type = Column(String, default="daily")  # daily, weekly, weekdays, custom
+    schedule_type = Column(String, default="daily")  # daily, weekly, weekdays, every_n_days, nth_weekday, monthly, custom_cron
     schedule_days = Column(JSON, nullable=True)  # [0,1,2,3,4,5,6] for custom
+    schedule_every_n_days = Column(Integer, nullable=True)  # for every_n_days
+    schedule_nth_weekday = Column(JSON, nullable=True)  # {"n": 2, "weekday": 1} for 2nd Tuesday
+    schedule_monthly_day = Column(Integer, nullable=True)  # 1-31 for monthly
+    schedule_cron = Column(String, nullable=True)  # cron expression
     time_window_start = Column(String, nullable=True)  # "07:00"
     time_window_end = Column(String, nullable=True)  # "08:00"
+    skip_on_holidays = Column(Boolean, default=False)  # school/holiday awareness
     
     # Other settings
     age_tier_min = Column(Integer, default=1)

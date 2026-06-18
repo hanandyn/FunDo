@@ -159,6 +159,19 @@ async def complete_task(
 
     template = instance.template
 
+    # Apply power-up multipliers if child has active ones
+    powerup_multiplier = 1.0
+    if child:
+        from ..services.powerups import apply_powerup_effect, get_applied_multipliers
+        # Apply double_points power-up
+        double_effect = await apply_powerup_effect(db, child.id, "double_points")
+        if double_effect:
+            powerup_multiplier *= double_effect
+        # Apply mystery_boost power-up
+        mystery_effect = await apply_powerup_effect(db, child.id, "mystery_boost")
+        if mystery_effect:
+            powerup_multiplier *= mystery_effect
+
     # Calculate points
     scoring = calculate_task_points(
         base_points=template.base_points or 10,
@@ -173,6 +186,13 @@ async def complete_task(
         streak_days=child.current_streak if child else 0,
         handicap_multiplier=child.handicap_multiplier if child else 100,
     )
+
+    # Apply power-up multiplier on top of scoring
+    if powerup_multiplier > 1.0:
+        powerup_bonus = int(scoring["total"] * (powerup_multiplier - 1))
+        scoring["powerup_bonus"] = powerup_bonus
+        scoring["powerup_multiplier"] = powerup_multiplier
+        scoring["total"] = int(scoring["total"] * powerup_multiplier)
 
     # Update instance
     instance.status = "completed"

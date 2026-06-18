@@ -98,4 +98,22 @@ export const api = {
   // Insights & Tips
   getInsightsTips: () => apiFetch('/insights/tips'),
   getInsightsAnalytics: (days = 30) => apiFetch(`/insights/analytics?days=${days}`),
+
+  // Power-Ups
+  getPowerUps: () => apiFetch('/powerups'),
+  purchasePowerUp: (id: number) => apiFetch(`/powerups/${id}/purchase`, { method: 'POST' }),
+  getActivePowerUps: () => apiFetch('/powerups/active'),
+
+  // Shabbat Mode
+  getShabbatSettings: () => apiFetch('/settings/shabbat'),
+  updateShabbatSettings: (data: JSONData) => apiFetch('/settings/shabbat', { method: 'PUT', body: JSON.stringify(data) }),
+  getShabbatStatus: () => apiFetch('/settings/shabbat/status'),
+
+  // Scheduling
+  schedulePreview: (templateId: number) => apiFetch('/settings/schedule/preview', { method: 'POST', body: JSON.stringify({ template_id: templateId }) }),
+  generateWeekInstances: () => apiFetch('/settings/schedule/generate', { method: 'POST' }),
+
+  // Theme Preferences
+  getThemePreferences: () => apiFetch('/settings/theme'),
+  updateThemePreferences: (data: JSONData) => apiFetch('/settings/theme', { method: 'PUT', body: JSON.stringify(data) }),
 };

@@ -1,8 +1,10 @@
 import { useState, type FormEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
-import { t } from '../../lib/i18n';
+import { LanguageSwitcher } from '../shared/LanguageSwitcher';
 
 export function LoginPage() {
+  const { t } = useTranslation();
   const { login, register } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -30,13 +32,18 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-quest-blue via-quest-purple to-quest-pink p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-quest-blue via-quest-purple to-quest-pink p-4" dir={document.documentElement.dir}>
       <div className="card-quest w-full max-w-md animate-bounce-in">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-2">🏰 QuestKids</h1>
+          <h1 className="text-4xl font-bold mb-2">🏰 {t('app.name')}</h1>
           <p className="text-gray-500 text-lg">
-            {isRegister ? 'Create your family account' : 'Welcome back, adventurer!'}
+            {isRegister ? t('auth.createAccount') : t('auth.welcomeBack')}
           </p>
+        </div>
+
+        {/* Language Switcher */}
+        <div className="flex justify-center mb-4">
+          <LanguageSwitcher />
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">

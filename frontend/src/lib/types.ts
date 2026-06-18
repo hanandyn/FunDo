@@ -16,6 +16,7 @@ export interface User {
   avatar_config?: string;
   theme_preference?: string;
   handicap_multiplier: number;
+  total_tasks_completed?: number;
 }
 
 export interface TaskTemplate {
@@ -52,6 +53,7 @@ export interface TaskInstance {
   id: number;
   template_id: number;
   child_id: number;
+  date?: string;
   status: 'pending' | 'in_progress' | 'completed' | 'missed' | 'skipped';
   timer_started_at?: string;
   timer_ended_at?: string;
@@ -295,4 +297,58 @@ export interface InsightStats {
 export interface InsightsResponse {
   tips: TipCard[];
   stats: InsightStats;
+}
+
+// Phase 4: Power-Ups
+export interface PowerUp {
+  id: number;
+  name: string;
+  description: string;
+  icon: string;
+  effect_type: 'double_points' | 'streak_shield' | 'time_freeze' | 'mystery_boost' | 'skip_pass';
+  effect_value: number;
+  cost_gems: number;
+  max_per_week: number;
+}
+
+export interface PowerUpPurchase {
+  id: number;
+  powerup_id: number;
+  powerup_name: string;
+  powerup_icon: string;
+  effect_type: string;
+  effect_value: number;
+  is_active: boolean;
+  purchased_at: string;
+  expires_at?: string | null;
+}
+
+// Phase 4: Shabbat
+export interface ShabbatSettings {
+  shabbat_mode: boolean;
+  shabbat_start_time?: string | null;
+  shabbat_end_time?: string | null;
+  shabbat_auto_detect: boolean;
+}
+
+export interface ShabbatStatus {
+  active: boolean;
+  greeting?: string | null;
+  starts_in_minutes?: number | null;
+  ends_in_minutes?: number | null;
+}
+
+// Phase 4: Theme
+export interface ThemePreferences {
+  focus_mode: boolean;
+  colorblind_theme?: string | null;
+  high_contrast: boolean;
+  language: string;
+}
+
+// Phase 4: Schedule Preview
+export interface ScheduleDay {
+  date: string;
+  day: string;
+  scheduled: boolean;
 }

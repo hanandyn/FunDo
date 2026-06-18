@@ -6,3 +6,4 @@ from .reward import Reward, RewardRedemption
 from .streak import StreakHistory, Achievement, ChildAchievement
 from .family_goal import FamilyGoal, FamilyGoalProgress
 from .cheer import Cheer
+from .powerup import PowerUp, PowerUpPurchase

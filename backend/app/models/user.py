@@ -49,6 +49,10 @@ class Family(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
     competition_mode = Column(String, default="friendly")  # friendly, competitive, team
+    shabbat_mode = Column(Boolean, default=False)
+    shabbat_start_time = Column(String, nullable=True)  # e.g. "18:30" per locale
+    shabbat_end_time = Column(String, nullable=True)     # e.g. "19:45"
+    shabbat_auto_detect = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     members = relationship("User", back_populates="family", foreign_keys="User.family_id")

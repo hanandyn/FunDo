@@ -1,0 +1,290 @@
+/* ============================================================
+   QuestKids — RTL Support & Accessibility Themes
+   ============================================================ */
+
+/* ---- RTL Layout Flipping ---- */
+[dir="rtl"] body {
+  text-align: right;
+  direction: rtl;
+}
+
+[dir="rtl"] .flex-row,
+[dir="rtl"] .flex {
+  /* naturally flips in most browsers, but ensure it */
+}
+
+[dir="rtl"] .space-x-1 > :not([hidden]) ~ :not([hidden]),
+[dir="rtl"] .space-x-2 > :not([hidden]) ~ :not([hidden]),
+[dir="rtl"] .space-x-3 > :not([hidden]) ~ :not([hidden]),
+[dir="rtl"] .space-x-4 > :not([hidden]) ~ :not([hidden]),
+[dir="rtl"] .space-x-6 > :not([hidden]) ~ :not([hidden]),
+[dir="rtl"] .gap-2,
+[dir="rtl"] .gap-3,
+[dir="rtl"] .gap-4,
+[dir="rtl"] .gap-6 {
+  /* Space utilities already work with flexbox RTL */
+}
+
+[dir="rtl"] .ml-auto {
+  margin-left: unset;
+  margin-right: auto;
+}
+[dir="rtl"] .mr-auto {
+  margin-right: unset;
+  margin-left: auto;
+}
+
+[dir="rtl"] .text-left {
+  text-align: right;
+}
+[dir="rtl"] .text-right {
+  text-align: left;
+}
+
+/* ---- Shabbat Mode Theme ---- */
+.shabbat-mode {
+  --shabbat-bg: #1a1030;
+  --shabbat-card: #231a40;
+  --shabbat-text: #d4c5f0;
+  --shabbat-accent: #9b72f0;
+  --shabbat-gold: #c9a23b;
+  --shabbat-border: #3a2a60;
+}
+
+.shabbat-mode body,
+body.shabbat-mode {
+  background: var(--shabbat-bg);
+  color: var(--shabbat-text);
+}
+
+.shabbat-mode .card-kid,
+.shabbat-mode .card-quest {
+  background: var(--shabbat-card);
+  border-color: var(--shabbat-border);
+  color: var(--shabbat-text);
+}
+
+.shabbat-mode .btn-primary {
+  background-color: var(--shabbat-accent);
+}
+
+.shabbat-mode header {
+  background: rgba(26, 16, 48, 0.95) !important;
+}
+
+.shabbat-mode .bg-white {
+  background-color: var(--shabbat-card) !important;
+}
+
+.shabbat-mode .bg-quest-bg {
+  background-color: var(--shabbat-bg) !important;
+}
+
+.shabbat-mode .text-gray-500,
+.shabbat-mode .text-gray-400 {
+  color: #8a7aaa;
+}
+
+/* Shabbat countdown banner */
+.shabbat-banner {
+  background: linear-gradient(135deg, #1a1030, #2a1850, #1a1030);
+  color: #e8dff5;
+  text-align: center;
+  padding: 1rem;
+  border-bottom: 2px solid #5a4a80;
+  font-size: 1.1rem;
+}
+
+.shabbat-banner .star {
+  display: inline-block;
+  animation: shabbat-twinkle 2s ease-in-out infinite;
+}
+
+@keyframes shabbat-twinkle {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+/* ---- ADHD / Focus Mode ---- */
+.focus-mode .quest-list > *:not(.focus-active) {
+  opacity: 0.2;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+.focus-mode .quest-list > *.focus-active {
+  opacity: 1;
+  transform: scale(1.02);
+  box-shadow: 0 0 30px rgba(74, 144, 217, 0.3);
+}
+
+.focus-mode .leaderboard-tab,
+.focus-mode .shop-tab {
+  display: none !important;
+}
+
+.focus-mode .animate-float {
+  animation: none !important;
+}
+.focus-mode .animate-pulse-glow {
+  animation: none !important;
+}
+.focus-mode .animate-bounce-in {
+  animation: none !important;
+}
+.focus-mode .animate-shimmer {
+  animation: none !important;
+}
+
+.focus-mode * {
+  transition-duration: 0.1s !important;
+}
+
+/* Pomodoro-style work timer in focus mode */
+.focus-timer {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border-radius: 1.5rem;
+  padding: 2rem;
+  text-align: center;
+  margin: 1rem 0;
+}
+
+.focus-timer .time-display {
+  font-size: 4rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.focus-timer .phase-label {
+  font-size: 1.25rem;
+  opacity: 0.8;
+  margin-top: 0.5rem;
+}
+
+/* ---- Colorblind Themes ---- */
+
+/* Deuteranopia (red-green) palette */
+.cb-deuteranopia {
+  --color-quest-blue: #4A90D9;
+  --color-quest-green: #C9A03C;
+  --color-quest-yellow: #E8D44D;
+  --color-quest-orange: #A07030;
+  --color-quest-red: #B04040;
+  --color-quest-purple: #722ED1;
+  --color-quest-pink: #D04080;
+  --color-quest-gold: #D4A030;
+  --color-quest-gem: #40B0D0;
+}
+
+/* Protanopia (red-green) palette */
+.cb-protanopia {
+  --color-quest-blue: #4080D0;
+  --color-quest-green: #B09840;
+  --color-quest-yellow: #E0D050;
+  --color-quest-orange: #A88830;
+  --color-quest-red: #A84040;
+  --color-quest-purple: #6828C8;
+  --color-quest-pink: #C83878;
+  --color-quest-gold: #C89838;
+  --color-quest-gem: #48A8C8;
+}
+
+/* Tritanopia (blue-yellow) palette */
+.cb-tritanopia {
+  --color-quest-blue: #409090;
+  --color-quest-green: #50A850;
+  --color-quest-yellow: #E0D0B0;
+  --color-quest-orange: #F08050;
+  --color-quest-red: #E05060;
+  --color-quest-purple: #8040B0;
+  --color-quest-pink: #E05080;
+  --color-quest-gold: #C8A850;
+  --color-quest-gem: #40A8B0;
+}
+
+/* High Contrast Mode */
+.high-contrast {
+  --color-quest-blue: #0066FF;
+  --color-quest-green: #009900;
+  --color-quest-yellow: #FFCC00;
+  --color-quest-orange: #FF6600;
+  --color-quest-red: #DD0000;
+  --color-quest-purple: #6600CC;
+  --color-quest-pink: #DD0066;
+  --color-quest-gold: #CCA300;
+  --color-quest-gem: #00AACC;
+  --color-quest-bg: #FFFFFF;
+  --color-quest-card: #FFFFFF;
+  --color-quest-dark: #000000;
+}
+
+.high-contrast body {
+  background: #ffffff;
+  color: #000000;
+}
+
+.high-contrast .card-kid,
+.high-contrast .card-quest {
+  border-width: 3px;
+  border-color: #000000;
+}
+
+.high-contrast .text-gray-500,
+.high-contrast .text-gray-400 {
+  color: #333333 !important;
+}
+
+.high-contrast button {
+  border: 2px solid currentColor;
+}
+
+/* ---- General Accessibility ---- */
+
+/* Skip to main content link */
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 0;
+  background: var(--color-quest-blue);
+  color: white;
+  padding: 0.5rem 1rem;
+  z-index: 1000;
+  font-weight: bold;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* Screen reader only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Focus visible for keyboard nav */
+:focus-visible {
+  outline: 3px solid var(--color-quest-blue);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Reduce motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

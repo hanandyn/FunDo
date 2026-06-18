@@ -5,21 +5,29 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .core.config import settings
-from .core.database import create_tables
-from .models import User, Family, TaskTemplate, TaskInstance, Reward, RewardRedemption, StreakHistory, Achievement, ChildAchievement, FamilyGoal, FamilyGoalProgress, Cheer  # noqa: F401
-from .api import auth, tasks, rewards, leaderboard, achievements, family_goals, cheers, recap
+from .core.database import create_tables, async_session
+from .models import User, Family, TaskTemplate, TaskInstance, Reward, RewardRedemption, StreakHistory, Achievement, ChildAchievement, FamilyGoal, FamilyGoalProgress, Cheer, PowerUp, PowerUpPurchase  # noqa: F401
+from .api import auth, tasks, rewards, leaderboard, achievements, family_goals, cheers, recap, powerups, settings as settings_api
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Create tables on startup."""
+    """Create tables and seed data on startup."""
     await create_tables()
+
+    # Seed power-ups
+    from .services.powerups import seed_powerups
+    from .services.achievements import seed_achievements
+    async with async_session() as db:
+        await seed_powerups(db)
+        await seed_achievements(db)
+
     yield
 
 
 app = FastAPI(
     title=settings.APP_NAME,
-    version="0.2.0",
+    version="0.4.0",
     lifespan=lifespan,
 )
 
@@ -41,8 +49,10 @@ app.include_router(achievements.router, prefix="/api/v1")
 app.include_router(family_goals.router, prefix="/api/v1")
 app.include_router(cheers.router, prefix="/api/v1")
 app.include_router(recap.router, prefix="/api/v1")
+app.include_router(powerups.router, prefix="/api/v1")
+app.include_router(settings_api.router, prefix="/api/v1")
 
 
 @app.get("/api/v1/health")
 async def health_check():
-    return {"status": "ok", "version": "0.2.0"}
+    return {"status": "ok", "version": "0.4.0"}
