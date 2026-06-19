@@ -410,8 +410,9 @@ function DoneStep({ data, onPrev }: StepProps) {
       await api.completeOnboarding();
 
       setDone(true);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : typeof err === 'object' && 'detail' in err ? (err as {detail: string}).detail : 'Something went wrong';
+      setError(msg);
     } finally {
       setCreating(false);
     }
