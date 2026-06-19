@@ -16,7 +16,21 @@
     "createAccount": "Create your family account",
     "alreadyHaveAccount": "Already have an account? Login",
     "noAccount": "Don't have an account? Register",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "whoAreYou": "Who are you?",
+    "imAKid": "I'm a Kid!",
+    "imAParent": "I'm a Grown-up",
+    "kidLogin": "Hi Kid! 👋",
+    "kidLoginDesc": "Log in to start your quests!",
+    "kidUsername": "Your Username",
+    "kidPassword": "Your Password",
+    "letsPlay": "Let's Play!",
+    "forgotCredentials": "Forgot your login?",
+    "askParent": "Ask your parent to check the credentials they got during setup!",
+    "parentLogin": "I'm a grown-up",
+    "backToChoice": "Back",
+    "newPassword": "New password",
+    "passwordRules": "Min 8 chars, at least 1 uppercase, 1 lowercase, 1 number"
   },
   "roles": {
     "parent": "Parent",
@@ -170,7 +184,13 @@
     "childAdded": "Child added! 🎉",
     "taskCreated": "Task template created! ✅",
     "rewardAdded": "Reward added to shop! 🛒",
-    "remove": "Remove"
+    "remove": "Remove",
+    "kidLogins": "Kid Login Info",
+    "kidLoginsDesc": "Share these with your kids so they can log in. They'll use the Kid login page with these credentials.",
+    "resetPassword": "Reset Password",
+    "resetPasswordFor": "Reset Password",
+    "resetPasswordDesc": "Choose a new password for",
+    "updatePassword": "Update"
   },
   "child": {
     "name": "Child Name",
@@ -487,6 +507,12 @@
     "finish": "Finish Setup",
     "allSet": "You are All Set!",
     "allSetDesc": "Your family adventure begins now!",
-    "goToDashboard": "Go to Dashboard"
+    "goToDashboard": "Go to Dashboard",
+    "kidCredentials": "Kid Login Credentials",
+    "kidCredentialsDesc": "Save these! Your kids will need them to log in. You can change passwords later in settings.",
+    "printCredentials": "Print this page"
+  },
+  "common": {
+    "cancel": "Cancel"
   }
 }

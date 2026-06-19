@@ -17,6 +17,7 @@ from ..models.user import User, Family
 from ..schemas.user import (
     UserCreate, UserLogin, UserResponse, TokenResponse,
     FamilyCreate, FamilyResponse,
+    ChildPasswordReset, ChildCredentialsResponse,
 )
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -207,6 +208,56 @@ async def get_children(
     )
     children = result.scalars().all()
     return [UserResponse.model_validate(c) for c in children]
+
+
+@router.get("/children/credentials", response_model=list[ChildCredentialsResponse])
+async def get_children_credentials(
+    current_user: User = Depends(get_current_parent),
+    db: AsyncSession = Depends(get_db),
+):
+    """Get children login credentials for the parent (so they can share with kids).
+    Only returns username and display_name — NOT the password hash.
+    The parent can reset the password if needed."""
+    result = await db.execute(
+        select(User).where(
+            User.family_id == current_user.family_id,
+            User.role == "child",
+        )
+    )
+    children = result.scalars().all()
+    return [
+        ChildCredentialsResponse(
+            id=c.id,
+            username=c.username,
+            display_name=c.display_name,
+            age_tier=c.age_tier,
+        )
+        for c in children
+    ]
+
+
+@router.post("/children/{child_id}/reset-password")
+async def reset_child_password(
+    child_id: int,
+    data: ChildPasswordReset,
+    current_user: User = Depends(get_current_parent),
+    db: AsyncSession = Depends(get_db),
+):
+    """Parent resets a child's password."""
+    # Verify the child belongs to this parent's family
+    result = await db.execute(select(User).where(User.id == child_id))
+    child = result.scalar_one_or_none()
+    if not child or child.family_id != current_user.family_id or child.role != "child":
+        raise HTTPException(status_code=404, detail="Child not found in your family")
+
+    pw_error = validate_password_strength(data.new_password)
+    if pw_error:
+        raise HTTPException(status_code=400, detail=pw_error)
+
+    child.hashed_password = hash_password(data.new_password)
+    await db.commit()
+
+    return {"message": f"Password updated for {child.display_name}"}
 
 
 # ── Email Verification ──────────────────────────────────────────────────

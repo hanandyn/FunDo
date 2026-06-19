@@ -30,6 +30,8 @@ export const api = {
   getMe: () => apiFetch('/auth/me'),
   getFamily: () => apiFetch('/auth/family'),
   getChildren: () => apiFetch('/auth/children'),
+  getChildrenCredentials: () => apiFetch('/auth/children/credentials'),
+  resetChildPassword: (childId: number, newPassword: string) => apiFetch(`/auth/children/${childId}/reset-password`, { method: 'POST', body: JSON.stringify({ new_password: newPassword }) }),
 
   // Tasks
   createTemplate: (data: JSONData) => apiFetch('/tasks/templates', { method: 'POST', body: JSON.stringify(data) }),

@@ -85,3 +85,16 @@ class FamilyResponse(BaseModel):
 
 class FamilyCreate(BaseModel):
     name: str
+
+
+class ChildCredentialsResponse(BaseModel):
+    """Lightweight response for parent to see child login info."""
+    id: int
+    username: str
+    display_name: str
+    age_tier: Optional[int] = None
+
+
+class ChildPasswordReset(BaseModel):
+    """Parent resets a child's password."""
+    new_password: str

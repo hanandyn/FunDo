@@ -17,6 +17,7 @@ import { SmartSuggestionsPanel } from './SmartSuggestionsPanel';
 import { AnalyticsDashboard } from './AnalyticsDashboard';
 import { FamilyMessageBoard } from '../shared/FamilyMessageBoard';
 import { RitualSettings } from '../settings/RitualSettings';
+import { KidCredentialsPanel } from './KidCredentialsPanel';
 
 export function ParentDashboard() {
   const { user, logout } = useAuth();
@@ -226,6 +227,9 @@ export function ParentDashboard() {
                 </motion.div>
               ))}
             </div>
+
+            {/* Kid Login Info Panel */}
+            <KidCredentialsPanel children={children} />
 
             {/* Add Child Form */}
             {showAddChild && (

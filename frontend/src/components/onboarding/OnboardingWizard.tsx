@@ -370,24 +370,28 @@ function DoneStep({ data, onPrev }: StepProps) {
   const [creating, setCreating] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState('');
+  const [createdChildren, setCreatedChildren] = useState<Array<{ name: string; username: string; password: string; tier: number }>>([]);
 
   const handleFinish = useCallback(async () => {
     setCreating(true);
     setError('');
     try {
       const children = (data.children as Array<{ name: string; age: number; tier: number }>) || [];
+      const createdCredentials: Array<{ name: string; username: string; password: string; tier: number }> = [];
 
-      // Create children
+      // Create children — capture credentials for display
       for (const child of children) {
         const childUsername = child.name.toLowerCase().replace(/\s/g, '') + Math.floor(Math.random() * 1000);
+        const childPassword = `${child.name.toLowerCase().replace(/\s/g, '')}123`;
         await api.createChild({
           username: childUsername,
           display_name: child.name,
           email: `${childUsername}@questkids.local`,
-          password: `${child.name.toLowerCase().replace(/\s/g, '')}123`,
+          password: childPassword,
           role: 'child',
           age_tier: child.tier,
         });
+        createdCredentials.push({ name: child.name, username: childUsername, password: childPassword, tier: child.tier });
       }
 
       // Create selected templates
@@ -414,6 +418,7 @@ function DoneStep({ data, onPrev }: StepProps) {
       await api.completeOnboarding();
 
       setDone(true);
+      setCreatedChildren(createdCredentials);
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
@@ -421,7 +426,7 @@ function DoneStep({ data, onPrev }: StepProps) {
         // FastAPI HTTPException: { detail: string } or { detail: [] }
         if ('detail' in err) {
           const detail = (err as {detail: unknown}).detail;
-          const msg = Array.isArray(detail) && detail.length > 0 ? detail.map((e: any) => e.msg && typeof e.msg === 'string' ? e.msg : JSON.stringify(e)).join(', ') : typeof detail === 'string' ? detail : JSON.stringify(err);
+          const msg = Array.isArray(detail) && detail.length > 0 ? detail.map((e: { msg?: string }) => e.msg && typeof e.msg === 'string' ? e.msg : JSON.stringify(e)).join(', ') : typeof detail === 'string' ? detail : JSON.stringify(err);
           setError(msg);
         } else {
           setError(JSON.stringify(err, null, 2));
@@ -448,9 +453,50 @@ function DoneStep({ data, onPrev }: StepProps) {
         <h1 className="text-3xl font-bold text-quest-dark mb-4">
           {t('onboarding.allSet', "You're All Set!")}
         </h1>
-        <p className="text-gray-600 mb-8 max-w-md mx-auto">
+        <p className="text-gray-600 mb-6 max-w-md mx-auto">
           {t('onboarding.allSetDesc', "Your family's adventure begins now! Check out the dashboard to see your kids' quests.")}
         </p>
+
+        {/* Display kid credentials so the parent can share them */}
+        {createdChildren.length > 0 && (
+          <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-6 mb-6 max-w-lg mx-auto text-left">
+            <h2 className="text-xl font-bold text-quest-dark mb-2 text-center">
+              🔑 {t('onboarding.kidCredentials', 'Kid Login Credentials')}
+            </h2>
+            <p className="text-sm text-gray-500 mb-4 text-center">
+              {t('onboarding.kidCredentialsDesc', 'Save these! Your kids will need them to log in. You can change passwords later in settings.')}
+            </p>
+            <div className="space-y-3">
+              {createdChildren.map((child, i) => (
+                <div key={i} className="bg-white rounded-xl p-4 border border-gray-100">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-2xl">{child.tier <= 2 ? '🧒' : child.tier <= 4 ? '👦' : '🧑'}</span>
+                    <span className="font-bold text-gray-800">{child.name}</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <span className="text-gray-400">Username:</span>
+                      <br />
+                      <span className="font-mono font-bold text-quest-blue select-all">{child.username}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-400">Password:</span>
+                      <br />
+                      <span className="font-mono font-bold text-quest-green select-all">{child.password}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <button
+              onClick={() => window.print()}
+              className="mt-4 text-sm text-quest-blue hover:underline focus-ring"
+            >
+              🖨 {t('onboarding.printCredentials', 'Print this page')}
+            </button>
+          </div>
+        )}
+
         <div className="flex gap-4 justify-center">
           <button
             onClick={() => window.location.reload()}

@@ -16,7 +16,21 @@
     "createAccount": "צור חשבון משפחתי",
     "alreadyHaveAccount": "כבר יש לך חשבון? התחבר",
     "noAccount": "אין לך חשבון? הירשם",
-    "loading": "טוען..."
+    "loading": "טוען...",
+    "whoAreYou": "מי אתה?",
+    "imAKid": "אני ילד/ה!",
+    "imAParent": "אני הורה",
+    "kidLogin": "היי ילד/ה! 👋",
+    "kidLoginDesc": "התחבר/י כדי להתחיל במשימות שלך!",
+    "kidUsername": "שם המשתמש שלך",
+    "kidPassword": "הסיסמה שלך",
+    "letsPlay": "בוא/י נשחק!",
+    "forgotCredentials": "שכחת את הפרטים?",
+    "askParent": "בקש/י מההורה שלך לבדוק את הפרטים שקיבלו בהגדרת החשבון!",
+    "parentLogin": "אני הורה",
+    "backToChoice": "חזרה",
+    "newPassword": "סיסמה חדשה",
+    "passwordRules": "מינימום 8 תווים, לפחות אות גדולה אחת, אות קטנה אחת, מספר אחד"
   },
   "roles": {
     "parent": "הורה",
@@ -170,7 +184,13 @@
     "childAdded": "הילד/ה נוסף/ה! 🎉",
     "taskCreated": "תבנית המשימה נוצרה! ✅",
     "rewardAdded": "הפרס נוסף לחנות! 🛒",
-    "remove": "הסר"
+    "remove": "הסר",
+    "kidLogins": "פרטי התחברות לילדים",
+    "kidLoginsDesc": "שתף/י את אלה עם הילדים שלך כדי שיוכלו להתחבר. הם ישתמשו בדף ההתחברות לילדים עם הפרטים האלה.",
+    "resetPassword": "איפוס סיסמה",
+    "resetPasswordFor": "איפוס סיסמה",
+    "resetPasswordDesc": "בחר/י סיסמה חדשה עבור",
+    "updatePassword": "עדכן"
   },
   "child": {
     "name": "שם הילד/ה",
@@ -330,5 +350,13 @@
     "practice": "אימון",
     "screen_time": "זמן מסך",
     "other": "אחר"
+  },
+  "onboarding": {
+    "kidCredentials": "פרטי התחברות לילדים",
+    "kidCredentialsDesc": "שמור/י את אלה! הילדים יצטרכו אותם כדי להתחבר. אפשר לשנות סיסמאות אחר כך בהגדרות.",
+    "printCredentials": "הדפס/י את הדף"
+  },
+  "common": {
+    "cancel": "ביטול"
   }
 }
