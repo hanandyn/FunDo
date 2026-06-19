@@ -125,6 +125,24 @@ class TaskApproveRequest(BaseModel):
     notes: Optional[str] = None
 
 
+class TaskStatusUpdateRequest(BaseModel):
+    """Parent updates a task instance status."""
+    status: str  # pending, in_progress, completed, missed, skipped
+    notes: Optional[str] = None
+
+
+class AssignTemplateRequest(BaseModel):
+    """Parent assigns a template to specific kids."""
+    child_ids: list[int]
+
+
+class ManualTaskCreateRequest(BaseModel):
+    """Parent manually creates a task instance for a specific kid."""
+    template_id: int
+    child_id: int
+    date: Optional[datetime] = None
+
+
 class PhotoUploadResponse(BaseModel):
     photo_url: str
     message: str = "Photo uploaded successfully"

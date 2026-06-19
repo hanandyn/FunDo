@@ -18,13 +18,14 @@ import { AnalyticsDashboard } from './AnalyticsDashboard';
 import { FamilyMessageBoard } from '../shared/FamilyMessageBoard';
 import { RitualSettings } from '../settings/RitualSettings';
 import { KidCredentialsPanel } from './KidCredentialsPanel';
+import { ParentTaskManagement } from './ParentTaskManagement';
 
 export function ParentDashboard() {
   const { user, logout } = useAuth();
   const [children, setChildren] = useState<User[]>([]);
   const [templates, setTemplates] = useState<TaskTemplate[]>([]);
   const [rewards, setRewards] = useState<Reward[]>([]);
-  const [activeTab, setActiveTab] = useState<'children' | 'tasks' | 'rewards' | 'goals' | 'recap' | 'insights' | 'organizations' | 'marketplace' | 'calendar' | 'teacher' | 'metrics' | 'analytics' | 'suggestions' | 'rituals'>('children');
+  const [activeTab, setActiveTab] = useState<'children' | 'tasks' | 'manage' | 'rewards' | 'goals' | 'recap' | 'insights' | 'organizations' | 'marketplace' | 'calendar' | 'teacher' | 'metrics' | 'analytics' | 'suggestions' | 'rituals'>('children');
   const [showAddChild, setShowAddChild] = useState(false);
   const [showAddTask, setShowAddTask] = useState(false);
   const [showAddReward, setShowAddReward] = useState(false);
@@ -44,6 +45,7 @@ export function ParentDashboard() {
   const firstAskBonus = 10;
   const penaltyPerAsk = 5;
   const [scheduleType, setScheduleType] = useState('daily');
+  const [taskAssignKids, setTaskAssignKids] = useState<number[]>([]);
 
   // Reward form
   const [rewardName, setRewardName] = useState('');
@@ -103,7 +105,7 @@ export function ParentDashboard() {
         penalty_per_ask: -Math.abs(penaltyPerAsk),
         overstay_penalty_per_min: Math.abs(5),
         schedule_type: scheduleType,
-        assigned_child_ids: children.map(c => c.id),
+        assigned_child_ids: taskAssignKids.length > 0 ? taskAssignKids : children.map(c => c.id),
       });
       setShowAddTask(false);
       setMessage('Task template created! ✅');
@@ -168,7 +170,7 @@ export function ParentDashboard() {
 
         {/* Tab Navigation */}
         <div className="flex gap-2 mb-6">
-          {(['children', 'tasks', 'rewards', 'goals', 'recap', 'insights', 'analytics', 'suggestions', 'rituals', 'marketplace', 'organizations', 'calendar', 'teacher', 'metrics'] as const).map(tab => (
+          {(['children', 'tasks', 'manage', 'rewards', 'goals', 'recap', 'insights', 'analytics', 'suggestions', 'rituals', 'marketplace', 'organizations', 'calendar', 'teacher', 'metrics'] as const).map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -178,7 +180,7 @@ export function ParentDashboard() {
                   : 'bg-white text-gray-600 hover:bg-gray-50'
               }`}
             >
-              {tab === 'children' ? '👶 Children' : tab === 'tasks' ? '📋 Tasks' : tab === 'rewards' ? '🎁 Rewards' : tab === 'goals' ? '🎯 Goals' : tab === 'recap' ? '📊 Recap' : tab === 'insights' ? '💡 Insights' : tab === 'analytics' ? '📊 Analytics' : tab === 'suggestions' ? '🧠 Tips' : tab === 'rituals' ? '🌅 Rituals' : tab === 'marketplace' ? '📋 Marketplace' : tab === 'organizations' ? '🏫 Orgs' : tab === 'calendar' ? '📅 Calendar' : tab === 'teacher' ? '👩‍🏫 Teacher' : '📈 Metrics'}
+              {tab === 'children' ? '👶 Children' : tab === 'manage' ? '⚖️ Manage' : tab === 'tasks' ? '📋 Tasks' : tab === 'rewards' ? '🎁 Rewards' : tab === 'goals' ? '🎯 Goals' : tab === 'recap' ? '📊 Recap' : tab === 'insights' ? '💡 Insights' : tab === 'analytics' ? '📊 Analytics' : tab === 'suggestions' ? '🧠 Tips' : tab === 'rituals' ? '🌅 Rituals' : tab === 'marketplace' ? '📋 Marketplace' : tab === 'organizations' ? '🏫 Orgs' : tab === 'calendar' ? '📅 Calendar' : tab === 'teacher' ? '👩‍🏫 Teacher' : '📈 Metrics'}
             </button>
           ))}
         </div>
@@ -333,15 +335,40 @@ export function ParentDashboard() {
                         <input type="number" value={maxAsks} onChange={e => setMaxAsks(Number(e.target.value))} className="w-full px-3 py-2 rounded-xl border-2 border-gray-200" />
                       </div>
                     </div>
+                    {/* Assign to specific kids */}
+                    <div>
+                      <label className="text-xs text-gray-500 mb-1 block">Assign to (default: all kids)</label>
+                      <div className="flex flex-wrap gap-2">
+                        {children.map(c => (
+                          <label key={c.id} className={`flex items-center gap-1 px-3 py-1.5 rounded-lg border-2 cursor-pointer text-sm transition-colors ${taskAssignKids.includes(c.id) ? 'border-quest-blue bg-blue-50 text-quest-blue' : 'border-gray-200 text-gray-500'}`}>
+                            <input
+                              type="checkbox"
+                              className="hidden"
+                              checked={taskAssignKids.includes(c.id)}
+                              onChange={e => {
+                                if (e.target.checked) setTaskAssignKids([...taskAssignKids, c.id]);
+                                else setTaskAssignKids(taskAssignKids.filter(id => id !== c.id));
+                              }}
+                            />
+                            {c.age_tier === 1 ? '🐣' : c.age_tier === 2 ? '🌟' : '🧑'} {c.display_name}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
                     <div className="flex gap-3">
                       <button type="submit" className="btn-primary flex-1">Create Task</button>
-                      <button type="button" onClick={() => setShowAddTask(false)} className="btn-quest bg-gray-200">Cancel</button>
+                      <button type="button" onClick={() => { setShowAddTask(false); setTaskAssignKids([]); }} className="btn-quest bg-gray-200">Cancel</button>
                     </div>
                   </form>
                 </div>
               </motion.div>
             )}
           </div>
+        )}
+
+        {/* Manage Tab — parent task management */}
+        {activeTab === 'manage' && (
+          <ParentTaskManagement children={children} />
         )}
 
         {/* Rewards Tab */}

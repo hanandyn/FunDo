@@ -49,6 +49,21 @@ export const api = {
   }),
   incrementAsk: (id: number) => apiFetch(`/tasks/instances/${id}/increment-ask`, { method: 'POST' }),
 
+  // Parent task management
+  updateTaskStatus: (instanceId: number, status: string, notes?: string) => apiFetch(`/tasks/instances/${instanceId}/status`, {
+    method: 'PUT',
+    body: JSON.stringify({ status, notes }),
+  }),
+  assignTemplate: (templateId: number, childIds: number[]) => apiFetch(`/tasks/templates/${templateId}/assign`, {
+    method: 'POST',
+    body: JSON.stringify({ child_ids: childIds }),
+  }),
+  createManualInstance: (templateId: number, childId: number, date?: string) => apiFetch('/tasks/instances/manual', {
+    method: 'POST',
+    body: JSON.stringify({ template_id: templateId, child_id: childId, date }),
+  }),
+  getAllInstances: (childId?: number, status?: string) => apiFetch(`/tasks/all-instances${(childId || status) ? '?' + [childId && `child_id=${childId}`, status && `status=${status}`].filter(Boolean).join('&') : ''}`),
+
   // Rewards
   createReward: (data: JSONData) => apiFetch('/rewards', { method: 'POST', body: JSON.stringify(data) }),
   getRewards: () => apiFetch('/rewards'),

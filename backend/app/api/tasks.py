@@ -19,6 +19,7 @@ from ..schemas.task import (
     TaskTemplateCreate, TaskTemplateResponse,
     TaskInstanceResponse, TimerStartRequest, TimerCompleteRequest,
     TaskApproveRequest, PhotoUploadResponse, PendingApprovalResponse,
+    TaskStatusUpdateRequest, AssignTemplateRequest, ManualTaskCreateRequest,
 )
 from ..services.scoring import (
     calculate_task_points, xp_for_next_level, calculate_level_from_xp,
@@ -324,7 +325,203 @@ async def approve_task(
     return TaskInstanceResponse.model_validate(instance)
 
 
-@router.post("/instances/{instance_id}/increment-ask")
+@router.put("/instances/{instance_id}/status", response_model=TaskInstanceResponse)
+async def update_task_status(
+    instance_id: int,
+    data: TaskStatusUpdateRequest,
+    current_user: User = Depends(get_current_parent),
+    db: AsyncSession = Depends(get_db),
+):
+    """Parent updates a task instance status.
+
+    Use cases:
+    - Mark completed (kid forgot to mark it)
+    - Revert to pending (kid accidentally marked done)
+    - Mark as missed or skipped
+    """
+    valid_statuses = {"pending", "in_progress", "completed", "missed", "skipped"}
+    if data.status not in valid_statuses:
+        raise HTTPException(status_code=400, detail=f"Invalid status. Must be one of: {valid_statuses}")
+
+    result = await db.execute(
+        select(TaskInstance)
+        .options(selectinload(TaskInstance.template))
+        .where(TaskInstance.id == instance_id)
+    )
+    instance = result.scalar_one_or_none()
+    if not instance:
+        raise HTTPException(status_code=404, detail="Task instance not found")
+    if instance.template.family_id != current_user.family_id:
+        raise HTTPException(status_code=403, detail="Not in your family")
+
+    old_status = instance.status
+    instance.status = data.status
+    if data.notes is not None:
+        instance.notes = data.notes
+
+    # If parent marks as completed, award points
+    if data.status == "completed" and old_status != "completed":
+        # Get the child to award points
+        child_result = await db.execute(select(User).where(User.id == instance.child_id))
+        child = child_result.scalar_one_or_none()
+        if child and instance.template:
+            points = instance.template.base_points or 0
+            instance.points_earned = points
+            child.stars = (child.stars or 0) + points
+            child.xp = (child.xp or 0) + points
+            child.total_tasks_completed = (child.total_tasks_completed or 0) + 1
+
+    # If reverting from completed to pending, deduct the points back
+    if old_status == "completed" and data.status == "pending":
+        child_result = await db.execute(select(User).where(User.id == instance.child_id))
+        child = child_result.scalar_one_or_none()
+        if child and instance.points_earned:
+            child.stars = max(0, (child.stars or 0) - instance.points_earned)
+            child.xp = max(0, (child.xp or 0) - instance.points_earned)
+            child.total_tasks_completed = max(0, (child.total_tasks_completed or 0) - 1)
+            instance.points_earned = 0
+
+    await db.commit()
+    await db.refresh(instance)
+    return TaskInstanceResponse.model_validate(instance)
+
+
+@router.post("/templates/{template_id}/assign", response_model=TaskTemplateResponse)
+async def assign_template_to_children(
+    template_id: int,
+    data: AssignTemplateRequest,
+    current_user: User = Depends(get_current_parent),
+    db: AsyncSession = Depends(get_db),
+):
+    """Parent assigns a task template to specific kids.
+
+    This updates which children get instances of this template.
+    """
+    result = await db.execute(select(TaskTemplate).where(TaskTemplate.id == template_id))
+    template = result.scalar_one_or_none()
+    if not template:
+        raise HTTPException(status_code=404, detail="Template not found")
+    if template.family_id != current_user.family_id:
+        raise HTTPException(status_code=403, detail="Not in your family")
+
+    # Verify all child_ids belong to this family
+    if data.child_ids:
+        children_result = await db.execute(
+            select(User).where(
+                User.id.in_(data.child_ids),
+                User.family_id == current_user.family_id,
+                User.role == "child",
+            )
+        )
+        children = children_result.scalars().all()
+        if len(children) != len(data.child_ids):
+            raise HTTPException(status_code=400, detail="Some child IDs are invalid or not in your family")
+
+    # Delete future pending instances for kids no longer assigned
+    # and create instances for newly assigned kids
+    from datetime import date, datetime, timezone
+    today = date.today()
+    tomorrow = (today.isoformat(), (today.replace(day=today.day + 1) if today.day < 28 else today.isoformat()))
+
+    # Get all future pending instances for this template
+    existing_result = await db.execute(
+        select(TaskInstance).where(
+            TaskInstance.template_id == template_id,
+            TaskInstance.status == "pending",
+            TaskInstance.date >= today.isoformat(),
+        )
+    )
+    existing_instances = existing_result.scalars().all()
+
+    # Remove instances for unassigned kids
+    for inst in existing_instances:
+        if inst.child_id not in data.child_ids:
+            await db.delete(inst)
+
+    # Create instances for newly assigned kids (for today)
+    existing_child_ids = {inst.child_id for inst in existing_instances}
+    for child_id in data.child_ids:
+        if child_id not in existing_child_ids:
+            instance = TaskInstance(
+                template_id=template_id,
+                child_id=child_id,
+                date=datetime.now(timezone.utc),
+                status="pending",
+            )
+            db.add(instance)
+
+    await db.commit()
+    await db.refresh(template)
+    return TaskTemplateResponse.model_validate(template)
+
+
+@router.post("/instances/manual", response_model=TaskInstanceResponse)
+async def create_manual_task_instance(
+    data: ManualTaskCreateRequest,
+    current_user: User = Depends(get_current_parent),
+    db: AsyncSession = Depends(get_db),
+):
+    """Parent manually creates a single task instance for a specific kid.
+
+    Use case: Assign 'empty the trash' to Almog for today.
+    """
+    result = await db.execute(select(TaskTemplate).where(TaskTemplate.id == data.template_id))
+    template = result.scalar_one_or_none()
+    if not template:
+        raise HTTPException(status_code=404, detail="Template not found")
+    if template.family_id != current_user.family_id:
+        raise HTTPException(status_code=403, detail="Not in your family")
+
+    # Verify child is in the family
+    child_result = await db.execute(
+        select(User).where(
+            User.id == data.child_id,
+            User.family_id == current_user.family_id,
+            User.role == "child",
+        )
+    )
+    child = child_result.scalar_one_or_none()
+    if not child:
+        raise HTTPException(status_code=400, detail="Child not found in your family")
+
+    task_date = data.date or datetime.now(timezone.utc)
+
+    instance = TaskInstance(
+        template_id=data.template_id,
+        child_id=data.child_id,
+        date=task_date,
+        status="pending",
+    )
+    db.add(instance)
+    await db.commit()
+    await db.refresh(instance)
+
+    # Load template for response
+    await db.refresh(instance, ["template"])
+    return TaskInstanceResponse.model_validate(instance)
+
+
+@router.get("/all-instances", response_model=list[TaskInstanceResponse])
+async def get_all_family_instances(
+    child_id: int | None = None,
+    status: str | None = None,
+    current_user: User = Depends(get_current_parent),
+    db: AsyncSession = Depends(get_db),
+):
+    """Parent views all task instances across all kids, with optional filters."""
+    query = (
+        select(TaskInstance)
+        .options(selectinload(TaskInstance.template), selectinload(TaskInstance.child))
+        .where(TaskInstance.template.has(TaskTemplate.family_id == current_user.family_id))
+    )
+    if child_id:
+        query = query.where(TaskInstance.child_id == child_id)
+    if status:
+        query = query.where(TaskInstance.status == status)
+    query = query.order_by(TaskInstance.date.desc()).limit(200)
+    result = await db.execute(query)
+    instances = result.scalars().all()
+    return [TaskInstanceResponse.model_validate(i) for i in instances]
 async def increment_ask_count(
     instance_id: int,
     current_user: User = Depends(get_current_parent),
