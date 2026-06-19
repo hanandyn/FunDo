@@ -379,10 +379,14 @@ function DoneStep({ data, onPrev }: StepProps) {
 
       // Create children
       for (const child of children) {
+        const childUsername = child.name.toLowerCase().replace(/\s/g, '') + Math.floor(Math.random() * 1000);
         await api.createChild({
+          username: childUsername,
           display_name: child.name,
-          age_tier: child.tier,
+          email: `${childUsername}@questkids.local`,
           password: `${child.name.toLowerCase().replace(/\s/g, '')}123`,
+          role: 'child',
+          age_tier: child.tier,
         });
       }
 
