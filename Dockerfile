@@ -1,15 +1,4 @@
 # Multi-stage build: QuestKids unified image
-# Stage 1: Build backend (Python)
-FROM python:3.12-slim AS backend-build
-WORKDIR /app
-COPY backend/requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-COPY backend/ .
-ENV PYTHONPATH=/app
-RUN mkdir -p /app/data /app/uploads
-RUN chmod +x docker-entrypoint.sh
-
-# Stage 2: Build frontend (Node/TypeScript)
 FROM node:22-alpine AS frontend-build
 WORKDIR /app
 COPY frontend/package*.json .
@@ -17,26 +6,32 @@ RUN npm ci
 COPY frontend/ .
 RUN npm run build
 
-# Stage 3: Final nginx with backend + frontend
-FROM nginx:alpine
+FROM python:3.12-slim
+WORKDIR /app
 
-# Install supervisord to run nginx + uvicorn
-RUN apk add --no-cache python3 py3-pip supervisor
+# Install nginx and supervisor
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    nginx supervisor \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy backend
-COPY --from=backend-build /app /app/backend
-RUN pip install --no-cache-dir --break-system-packages -r /app/backend/requirements.txt
+# Install Python deps
+COPY backend/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY backend/ .
 
 # Copy frontend build
 COPY --from=frontend-build /app/dist /usr/share/nginx/html
 
-# Copy nginx config
-COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
+# Configure nginx
+RUN rm /etc/nginx/sites-enabled/default 2>/dev/null || true
+COPY nginx-app.conf /etc/nginx/conf.d/default.conf
 
-# Supervisord config to run both services
-RUN mkdir -p /etc/supervisor/conf.d
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+# Setup supervisord
+COPY supervisord-app.conf /etc/supervisor/conf.d/supervisord.conf
+
+ENV PYTHONPATH=/app
+RUN mkdir -p /app/data /app/uploads
 
 EXPOSE 80
 
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/supervisord.conf"]
