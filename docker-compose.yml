@@ -41,8 +41,8 @@ services:
 
   frontend:
     build: ./frontend
-    ports:
-      - "${FRONTEND_PORT:-80}:80"
+    expose:
+      - "80"
     depends_on:
       - backend
     healthcheck:
