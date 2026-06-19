@@ -21,6 +21,8 @@ from .api import organizations, templates_marketplace, integrations, external, s
 from .api import tier1, avatars, allowance
 from .api import sound, rituals, family_messages, suggestions, analytics
 from .api import onboarding  # Phase 9: Onboarding Wizard
+from .api import privacy, performance  # Phase 10: GDPR & Performance
+from .api.performance import RequestTimingMiddleware  # Phase 10: Slow request logging
 
 # Rate limiter
 limiter = Limiter(key_func=get_remote_address, default_limits=["200/minute"])
@@ -47,7 +49,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title=settings.APP_NAME,
-    version="0.9.0",
+    version="0.10.0",
     lifespan=lifespan,
 )
 
@@ -80,6 +82,9 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         return response
 
 app.add_middleware(SecurityHeadersMiddleware)
+
+# Performance request timing middleware (Phase 10)
+app.add_middleware(RequestTimingMiddleware)
 
 
 # CSRF protection for auth endpoints
@@ -157,6 +162,10 @@ app.include_router(allowance.router, prefix="/api/v1")
 
 # Phase 8 routes
 app.include_router(onboarding.router, prefix="/api/v1")  # Phase 9: Onboarding
+
+# Phase 10 routes
+app.include_router(privacy.router, prefix="/api/v1")
+app.include_router(performance.router, prefix="/api/v1")
 app.include_router(sound.router, prefix="/api/v1")
 app.include_router(rituals.router, prefix="/api/v1")
 app.include_router(family_messages.router, prefix="/api/v1")
@@ -177,7 +186,7 @@ async def health_check():
 
     return {
         "status": "ok" if db_ok else "degraded",
-        "version": "0.9.0",
+        "version": "0.10.0",
         "database": "connected" if db_ok else "disconnected",
     }
 
@@ -210,7 +219,7 @@ async def health_detailed():
 
     return {
         "status": "ok" if db_ok else "degraded",
-        "version": "0.9.0",
+        "version": "0.10.0",
         "database": {
             "connected": db_ok,
             "latency_ms": db_latency_ms,

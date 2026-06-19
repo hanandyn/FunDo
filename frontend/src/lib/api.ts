@@ -242,4 +242,12 @@ export const api = {
   fulfillRedemption: (id: number, notes?: string) => apiFetch(`/rewards/redemptions/${id}/fulfill`, { method: 'POST', body: JSON.stringify({ notes }) }),
   cancelRedemption: (id: number) => apiFetch(`/rewards/redemptions/${id}/cancel`, { method: 'POST' }),
   getPendingRedemptions: () => apiFetch('/rewards/redemptions/pending'),
+
+  // Phase 10: GDPR Privacy
+  getDataSummary: () => apiFetch('/user/data-summary'),
+  exportUserData: () => apiFetch('/user/export-data', { method: 'POST' }),
+  deleteAccount: () => apiFetch('/user/delete-account', { method: 'POST' }),
+
+  // Phase 10: Performance
+  getPerformanceMetrics: () => apiFetch('/health/performance'),
 };

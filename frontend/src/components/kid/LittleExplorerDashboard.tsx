@@ -1,9 +1,11 @@
-import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../contexts/AuthContext';
 import { api } from '../../lib/api';
 import * as sounds from '../../lib/sounds';
 import type { Tier1Task, PetState } from '../../lib/types';
+import { useVoicePrompt } from './useVoicePrompt';
+import { VoiceSettings } from './VoiceSettings';
 
 /**
  * Little Explorers Dashboard — for ages 3-5
@@ -15,16 +17,6 @@ import type { Tier1Task, PetState } from '../../lib/types';
  * - Voice guidance for every action
  * - Visual progress (fill a jar, grow a tree)
  */
-
-// Speech synthesis helper
-function speak(text: string) {
-  if (!('speechSynthesis' in window)) return;
-  window.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.rate = 0.85;
-  utterance.pitch = 1.1;
-  window.speechSynthesis.speak(utterance);
-}
 
 // World scene colors based on brightness
 function worldColors(brightness: number) {
@@ -40,11 +32,11 @@ function pseudo(seed: number, idx: number): number {
 
 export function LittleExplorerDashboard() {
   const { user, logout } = useAuth();
+  const { speak, speakGreeting } = useVoicePrompt();
   const [tasks, setTasks] = useState<Tier1Task[]>([]);
   const [petState, setPetState] = useState<PetState | null>(null);
   const [completingId, setCompletingId] = useState<number | null>(null);
   const [showFireworks, setShowFireworks] = useState(false);
-  const hasSpokenRef = useRef(false);
 
   const loadData = useCallback(async () => {
     try {
@@ -56,13 +48,12 @@ export function LittleExplorerDashboard() {
       const pet = petData as unknown as PetState;
       setPetState(pet);
 
-      // Voice greeting on first load
-      if (!hasSpokenRef.current && pet) {
-        hasSpokenRef.current = true;
+      // Voice greeting on first load (handled by useVoicePrompt)
+      if (pet) {
         const msg = pet.pet.mood === 'waiting'
           ? "Hi there! Let's do some fun tasks together!"
           : `Welcome back! Your ${pet.pet.stage} is ${pet.pet.mood}! Let's play!`;
-        setTimeout(() => speak(msg), 800);
+        setTimeout(() => speakGreeting(msg), 800);
       }
     } catch { /* ignore */ }
   }, []);
@@ -90,7 +81,7 @@ export function LittleExplorerDashboard() {
         'Great work! The flowers are blooming!',
       ];
       const idx = (new Date().getTime()) % praises.length;
-      speak(praises[Math.abs(idx)]);
+      speak(praises[Math.abs(idx)], 'celebration');
 
       // Reload
       setTimeout(() => {
@@ -228,18 +219,19 @@ export function LittleExplorerDashboard() {
           </div>
         </div>
         <div className="flex items-center gap-3">
+          <VoiceSettings />
           {/* Stars Jar visual */}
           <motion.div
             className="flex items-center gap-1 bg-white/20 backdrop-blur rounded-full px-4 py-2"
             whileTap={{ scale: 0.95 }}
-            onClick={() => speak(`You have ${user?.stars || 0} stars and ${user?.gems || 0} gems!`)}
+            onClick={() => speak(`You have ${user?.stars || 0} stars and ${user?.gems || 0} gems!`, 'encouragement')}
           >
             <span className="text-2xl">⭐</span>
             <span className="text-xl font-bold text-white">{user?.stars}</span>
           </motion.div>
           <motion.button
             whileTap={{ scale: 0.9 }}
-            onClick={() => { speak('Bye bye!'); logout(); }}
+            onClick={() => { speak('Bye bye!', 'greeting'); logout(); }}
             className="bg-white/10 hover:bg-white/20 text-white text-2xl rounded-full w-12 h-12 flex items-center justify-center backdrop-blur"
             aria-label="Log out"
           >
@@ -262,7 +254,7 @@ export function LittleExplorerDashboard() {
                 content: "Let's do more fun things!",
                 waiting: "I can't wait to play! Tap a task to start!",
               };
-              speak(msgs[pet.mood] || "Hello friend!");
+              speak(msgs[pet.mood] || "Hello friend!", 'encouragement');
             }
           }}
         >
@@ -373,7 +365,7 @@ export function LittleExplorerDashboard() {
                   whileHover={{ scale: 1.1, y: -5 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={() => {
-                    speak(task.audio_prompt || 'Time for this task!');
+                    speak(task.audio_prompt || 'Time for this task!', 'task-name');
                     handleComplete(task);
                   }}
                   disabled={completingId !== null}

@@ -9,6 +9,8 @@ import { ShabbatBanner } from './components/kid/ShabbatBanner';
 import { RitualBanner } from './components/shared/RitualBanner';
 import { setLanguageDirection, SUPPORTED_LANGUAGES } from './lib/i18n';
 import { api } from './lib/api';
+import { initPerformanceMonitor } from './lib/performance';
+import { CookieConsentBanner } from './components/shared/CookieConsent';
 import { useTranslation } from 'react-i18next';
 import type { ThemePreferences } from './lib/types';
 
@@ -33,6 +35,9 @@ const TeacherDashboardPage = lazy(() => import('./lazy/TeacherDashboard'));
 const NotificationPrefsPage = lazy(() => import('./lazy/NotificationPreferences'));
 const RitualSettingsPage = lazy(() => import('./lazy/RitualSettings'));
 const IntegrationsSettingsPage = lazy(() => import('./lazy/IntegrationsSettings'));
+
+// Phase 10
+const PrivacySettingsPage = lazy(() => import('./lazy/PrivacySettings'));
 
 // Phase 9: Shared components still eagerly loaded (needed everywhere)
 const LoadingFallback = () => (
@@ -63,6 +68,9 @@ function AppContent() {
         applyThemeClasses(prefs);
       })
       .catch(() => {});
+
+    // Phase 10: Init performance monitoring
+    initPerformanceMonitor();
   }, []);
 
   // Phase 9: Check if parent needs onboarding
@@ -184,6 +192,7 @@ function AppContent() {
           <Route path="/notification-prefs" element={<NotificationPrefsPage />} />
           <Route path="/ritual-settings" element={<RitualSettingsPage />} />
           <Route path="/integrations" element={<IntegrationsSettingsPage />} />
+          <Route path="/privacy" element={<PrivacySettingsPage />} />
           <Route path="*" element={<ParentDashboard />} />
         </Routes>
       </Suspense>
@@ -205,6 +214,7 @@ function App() {
       <AuthProvider>
         <ToastProvider>
           <AppContent />
+          <CookieConsentBanner />
         </ToastProvider>
       </AuthProvider>
     </BrowserRouter>

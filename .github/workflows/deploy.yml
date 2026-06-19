@@ -1,0 +1,49 @@
+name: Deploy to Coolify
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deploy environment'
+        required: false
+        default: 'production'
+        type: choice
+        options:
+          - production
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  deploy:
+    name: Trigger Coolify Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger Coolify deployment
+        env:
+          COOLIFY_URL: ${{ secrets.COOLIFY_URL }}
+          COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
+        run: |
+          if [ -z "$COOLIFY_URL" ] || [ -z "$COOLIFY_TOKEN" ]; then
+            echo "⚠️  COOLIFY_URL or COOLIFY_TOKEN not set — skipping deploy"
+            exit 0
+          fi
+
+          RESPONSE=$(curl -s -w "\n%{http_code}" \
+            -H "Authorization: Bearer ${COOLIFY_TOKEN}" \
+            "${COOLIFY_URL}/api/v1/deploy?uuid=mx4p4ti6sqeijosuzj2b534a&force=true")
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+
+          echo "Deploy response (HTTP $HTTP_CODE):"
+          echo "$BODY"
+
+          if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
+            echo "✅  Deployment triggered successfully!"
+          else
+            echo "⚠️  Deployment trigger returned HTTP $HTTP_CODE"
+            echo "This may be expected if the Coolify deploy API endpoint returns non-2xx."
+            echo "Check Coolify dashboard to confirm deployment started."
+          fi
