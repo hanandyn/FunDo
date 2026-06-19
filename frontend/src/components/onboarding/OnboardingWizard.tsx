@@ -411,7 +411,7 @@ function DoneStep({ data, onPrev }: StepProps) {
 
       setDone(true);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : typeof err === 'object' && 'detail' in err ? (err as {detail: string}).detail : 'Something went wrong';
+      const msg = err instanceof Error ? err.message : typeof err === 'object' && err !== null && 'detail' in err ? (err as {detail: string}).detail : 'Something went wrong';
       setError(msg);
     } finally {
       setCreating(false);
