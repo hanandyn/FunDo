@@ -543,5 +543,7 @@
   "parent.parse": "Parse",
   "parent.preview": "Preview",
   "parent.confidence": "confidence",
-  "parent.createTask": "Create Task"
+  "parent.createTask": "Create Task",
+  "settings.voiceNarration": "Voice Narration",
+  "settings.voiceNarrationDesc": "Spoken encouragement and tips"
 }

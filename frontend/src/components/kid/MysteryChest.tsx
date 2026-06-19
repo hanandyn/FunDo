@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../../lib/api';
 import type { ChestResult } from '../../lib/types';
-import * as sounds from '../../lib/sounds';
+import * as audio from '../../lib/audio';
 
 interface Props {
   onResult: (result: ChestResult) => void;
@@ -18,7 +18,7 @@ export function MysteryChest({ onResult, onClose }: Props) {
   const handleOpen = useCallback(async () => {
     if (opening) return;
     setOpening(true);
-    sounds.playChestOpen();
+    audio.playChestOpen();
 
     // Animate chest opening
     setTimeout(async () => {

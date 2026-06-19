@@ -24,7 +24,7 @@ import { KidDailyRecap } from './KidDailyRecap';
 import heroImg from '../../assets/questkids-hero.jpg';
 import emptyImg from '../../assets/questkids-empty.jpg';
 import { useCheers } from '../../lib/useCheers';
-import * as sounds from '../../lib/sounds';
+import * as audio from '../../lib/audio';
 
 type ViewType = 'quests' | 'shop' | 'leaderboard' | 'achievements' | 'powerups' | 'settings';
 
@@ -92,7 +92,7 @@ export function KidQuestBoard() {
   };
 
   const handleStartTimer = async (instance: TaskInstance) => {
-    sounds.playButtonClick();
+    audio.playButtonClick();
     try {
       await api.startTimer(instance.id);
       setActiveTimer({ ...instance, status: 'in_progress' });
@@ -109,8 +109,8 @@ export function KidQuestBoard() {
       setActiveTimer(null);
 
       // Sound effects
-      sounds.playTaskComplete();
-      setTimeout(() => sounds.playPointsEarned(), 400);
+      audio.playTaskComplete();
+      setTimeout(() => audio.playPointsEarned(), 400);
 
       // Confetti
       setShowConfetti(true);
@@ -123,14 +123,14 @@ export function KidQuestBoard() {
       }
       if (extras.leveled_up) {
         msg += ` LEVEL UP to ${extras.new_level}! 🚀`;
-        setTimeout(() => sounds.playLevelUp(), 800);
+        setTimeout(() => audio.playLevelUp(), 800);
       }
       showMessage(msg, 'success');
 
       // Achievement notification
       if (extras.new_achievements && extras.new_achievements.length > 0) {
         setNewAchievements(extras.new_achievements);
-        setTimeout(() => sounds.playAchievement(), 600);
+        setTimeout(() => audio.playAchievement(), 600);
         setTimeout(() => setNewAchievements([]), 5000);
       }
 
@@ -151,7 +151,7 @@ export function KidQuestBoard() {
       const result = await api.completeTask(instance.id, 0);
       const extras = (result as unknown as TaskCompleteExtras);
 
-      sounds.playTaskComplete();
+      audio.playTaskComplete();
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 3000);
 
@@ -161,13 +161,13 @@ export function KidQuestBoard() {
       }
       if (extras.leveled_up) {
         msg += ` LEVEL UP to ${extras.new_level}! 🚀`;
-        setTimeout(() => sounds.playLevelUp(), 600);
+        setTimeout(() => audio.playLevelUp(), 600);
       }
       showMessage(msg, 'success');
 
       if (extras.new_achievements && extras.new_achievements.length > 0) {
         setNewAchievements(extras.new_achievements);
-        setTimeout(() => sounds.playAchievement(), 500);
+        setTimeout(() => audio.playAchievement(), 500);
         setTimeout(() => setNewAchievements([]), 5000);
       }
 
@@ -195,14 +195,14 @@ export function KidQuestBoard() {
 
   const handleRedeemReward = async (reward: Reward) => {
     if (!user) return;
-    sounds.playButtonClick();
+    audio.playButtonClick();
     if (reward.cost_stars > user.stars) {
       showMessage('Not enough stars! Keep questing! ⭐', 'info');
       return;
     }
     try {
       await api.redeemReward(reward.id);
-      sounds.playPointsEarned();
+      audio.playPointsEarned();
       showMessage(`Redeemed: ${reward.name}! 🎁`, 'success');
       loadData();
     } catch (err: unknown) {
@@ -212,7 +212,7 @@ export function KidQuestBoard() {
 
   const handleSpinResult = (result: SpinResult) => {
     if (result.prize_type !== 'nothing') {
-      setTimeout(() => sounds.playPointsEarned(), 500);
+      setTimeout(() => audio.playPointsEarned(), 500);
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 3000);
     }
@@ -227,7 +227,7 @@ export function KidQuestBoard() {
 
   const handleAvatarSave = (_config: string) => {
     void _config;
-    sounds.playButtonClick();
+    audio.playButtonClick();
     showMessage('Avatar updated!', 'success');
     loadData();
   };
@@ -267,7 +267,7 @@ export function KidQuestBoard() {
         <div className="max-w-6xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <h1 className="text-xl font-bold flex items-center gap-2 cursor-pointer"
-              onClick={() => { sounds.playButtonClick(); setActiveView('quests'); }}
+              onClick={() => { audio.playButtonClick(); setActiveView('quests'); }}
             >
               🏰 QuestKids <span className="text-xs text-gray-300 ml-1">v0.8.0</span>
             </h1>
@@ -317,7 +317,7 @@ export function KidQuestBoard() {
               <motion.button
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                onClick={() => { sounds.playButtonClick(); setShowSpin(true); }}
+                onClick={() => { audio.playButtonClick(); setShowSpin(true); }}
                 className="bg-quest-gold text-quest-dark px-4 py-2 rounded-full text-sm font-bold animate-pulse-glow"
               >
                 🎡 Daily Spin!
@@ -327,7 +327,7 @@ export function KidQuestBoard() {
               <motion.button
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                onClick={() => { sounds.playButtonClick(); setShowChest(true); }}
+                onClick={() => { audio.playButtonClick(); setShowChest(true); }}
                 className="bg-quest-purple/50 text-white px-4 py-2 rounded-full text-sm font-bold animate-pulse-glow"
               >
                 🎁 Open Chest!
@@ -387,7 +387,7 @@ export function KidQuestBoard() {
           ] as [ViewType, string][]).map(([view, label]) => (
             <button
               key={view}
-              onClick={() => { sounds.playButtonClick(); setActiveView(view); }}
+              onClick={() => { audio.playButtonClick(); setActiveView(view); }}
               className={`px-4 py-3 rounded-2xl font-bold text-sm md:text-base transition-all touch-target ${
                 activeView === view
                   ? 'bg-quest-blue text-white shadow-lg scale-105'

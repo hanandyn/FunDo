@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../lib/api';
+import * as audio from '../../lib/audio';
 
 /**
  * Kid's Daily Recap — shows evening summary of today's achievements.
@@ -23,7 +24,11 @@ export function KidDailyRecap() {
       const summary = (data as Record<string, unknown>)?.summary as Record<string, unknown> | undefined;
       if (summary && (summary.completed as number) > 0) {
         const dismissed = localStorage.getItem('recap-dismissed-' + new Date().toDateString());
-        if (!dismissed) setShow(true);
+        if (!dismissed) {
+          setShow(true);
+          // Play recap intro voice after a short delay
+          setTimeout(() => audio.playRecapIntro(), 500);
+        }
       }
     }).catch(() => {});
   }, []);

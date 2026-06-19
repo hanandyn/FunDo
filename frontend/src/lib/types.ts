@@ -560,6 +560,7 @@ export interface NotificationPreferences {
   cheer_received: boolean;
   family_goal: boolean;
   sounds: boolean;
+  voice_narration: boolean;
   toasts: boolean;
 }
 

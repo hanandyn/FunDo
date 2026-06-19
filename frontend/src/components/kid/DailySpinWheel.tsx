@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { api } from '../../lib/api';
 import type { SpinResult } from '../../lib/types';
-import * as sounds from '../../lib/sounds';
+import * as audio from '../../lib/audio';
 
 const SEGMENTS = [
   { label: '10 ⭐', color: '#FFD700' },
@@ -41,7 +41,7 @@ export function DailySpinWheel({ onResult, onClose }: Props) {
     const startTime = performance.now();
     const startRotation = rotation;
     const tickInterval = setInterval(() => {
-      sounds.playSpinTick();
+      audio.playSpinTick();
     }, 80);
 
     const animate = (now: number) => {
@@ -63,7 +63,7 @@ export function DailySpinWheel({ onResult, onClose }: Props) {
           .then((res) => {
             const spinResult = res as unknown as SpinResult;
             setResult(spinResult);
-            sounds.playSpinResult();
+            audio.playSpinResult();
             onResult(spinResult);
           })
           .catch((err) => {

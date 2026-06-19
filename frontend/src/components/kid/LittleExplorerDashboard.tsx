@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../contexts/AuthContext';
 import { api } from '../../lib/api';
-import * as sounds from '../../lib/sounds';
+import * as audio from '../../lib/audio';
 import type { Tier1Task, PetState } from '../../lib/types';
 import { useVoicePrompt } from './useVoicePrompt';
 import { VoiceSettings } from './VoiceSettings';
@@ -65,11 +65,11 @@ export function LittleExplorerDashboard() {
   const handleComplete = async (task: Tier1Task) => {
     if (completingId) return;
     setCompletingId(task.id);
-    sounds.playTaskComplete();
+    audio.playTaskComplete();
 
     try {
       await api.completeTier1Task(task.id);
-      sounds.playPointsEarned();
+      audio.playPointsEarned();
 
       // Celebrate
       setShowFireworks(true);

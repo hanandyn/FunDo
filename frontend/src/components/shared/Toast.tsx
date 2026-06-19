@@ -1,6 +1,6 @@
 import { useState, useCallback, createContext, useContext } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import * as sounds from '../../lib/sounds';
+import * as audio from '../../lib/audio';
 
 interface Toast {
   id: string;
@@ -33,9 +33,9 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     setToasts(prev => [...prev, newToast]);
 
     // Play sound based on type
-    if (toast.type === 'success') sounds.playPointsEarned();
-    else if (toast.type === 'achievement') sounds.playAchievement();
-    else if (toast.type === 'warning') sounds.playTimerWarning();
+    if (toast.type === 'success') audio.playPointsEarned();
+    else if (toast.type === 'achievement') audio.playAchievement();
+    else if (toast.type === 'warning') audio.playTimerWarning();
 
     // Auto-remove
     setTimeout(() => {

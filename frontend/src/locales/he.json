@@ -387,5 +387,7 @@
   "parent.parse": "פענח",
   "parent.preview": "תצוגה מקדימה",
   "parent.confidence": "ביטחון",
-  "parent.createTask": "צור/י משימה"
+  "parent.createTask": "צור/י משימה",
+  "settings.voiceNarration": "קריינות קולית",
+  "settings.voiceNarrationDesc": "עידוד מדובר וטיפים"
 }

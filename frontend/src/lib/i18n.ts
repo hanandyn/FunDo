@@ -59,6 +59,13 @@ export function getLanguageDir(): 'ltr' | 'rtl' {
   return (lang?.dir as 'ltr' | 'rtl') || 'ltr';
 }
 
+// Sync language to audio manager on language change
+i18n.on('languageChanged', (lng) => {
+  import('./audio').then(({ setLanguage }) => setLanguage(lng));
+  const lang = SUPPORTED_LANGUAGES.find(l => l.code === lng);
+  if (lang) setLanguageDirection(lang.dir as 'ltr' | 'rtl');
+});
+
 export function setLanguageDirection(dir: 'ltr' | 'rtl') {
   document.documentElement.dir = dir;
   document.documentElement.lang = i18n.language;

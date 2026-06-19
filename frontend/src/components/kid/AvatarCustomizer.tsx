@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../../lib/api';
 import { useAuth } from '../../contexts/AuthContext';
-import * as sounds from '../../lib/sounds';
+import * as audio from '../../lib/audio';
 import type { AvatarShopItem, OwnedAvatarItem } from '../../lib/types';
 
 type TabType = 'inventory' | 'shop';
@@ -62,7 +62,7 @@ export function AvatarCustomizer() {
   const handleBuy = async (item: AvatarShopItem) => {
     try {
       const result = await api.buyAvatarItem(item.id) as unknown as { message: string; gems_remaining: number; stars_remaining: number };
-      sounds.playPointsEarned();
+      audio.playPointsEarned();
       showMessage(result.message || `Bought ${item.item_name}!`);
       loadData();
     } catch (err) {
@@ -73,7 +73,7 @@ export function AvatarCustomizer() {
   const handleEquip = async (ownedItem: OwnedAvatarItem) => {
     try {
       await api.equipAvatarItem(ownedItem.id);
-      sounds.playButtonClick();
+      audio.playButtonClick();
       showMessage(`${ownedItem.item_name} ${ownedItem.equipped ? 'unequipped' : 'equipped'}!`);
       loadData();
     } catch (err) {

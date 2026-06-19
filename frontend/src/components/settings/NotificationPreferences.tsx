@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import * as sounds from '../../lib/sounds';
+import * as audio from '../../lib/audio';
 import type { NotificationPreferences } from '../../lib/types';
 
 const DEFAULT_PREFS: NotificationPreferences = {
@@ -12,6 +12,7 @@ const DEFAULT_PREFS: NotificationPreferences = {
   cheer_received: true,
   family_goal: true,
   sounds: true,
+  voice_narration: true,
   toasts: true,
 };
 
@@ -27,12 +28,13 @@ export function NotificationPreferencesPanel() {
 
   useEffect(() => {
     localStorage.setItem('questkids_notification_prefs', JSON.stringify(prefs));
-    sounds.setMuted(!prefs.sounds);
+    audio.setMuted(!prefs.sounds);
+    audio.setVoiceEnabled(prefs.voice_narration);
   }, [prefs]);
 
   const toggle = (key: keyof NotificationPreferences) => {
     setPrefs(prev => ({ ...prev, [key]: !prev[key] }));
-    sounds.playButtonClick();
+    audio.playButtonClick();
   };
 
   const items: Array<{ key: keyof NotificationPreferences; label: string; icon: string; description: string }> = [
@@ -44,6 +46,7 @@ export function NotificationPreferencesPanel() {
     { key: 'cheer_received', label: 'Cheers', icon: '👏', description: 'When siblings cheer you on' },
     { key: 'family_goal', label: 'Family Goals', icon: '🎯', description: 'Family goal updates' },
     { key: 'sounds', label: 'Sound Effects', icon: '🔊', description: 'Play sounds for actions' },
+    { key: 'voice_narration', label: 'Voice Narration', icon: '🎤', description: 'Spoken encouragement and tips' },
     { key: 'toasts', label: 'Popup Notifications', icon: '💬', description: 'Show toast popups' },
   ];
 

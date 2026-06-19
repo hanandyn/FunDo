@@ -6,7 +6,7 @@ import type { TaskInstance, KidRecap, AllowanceStatus } from '../../lib/types';
 import { CountdownTimer } from '../timer/CountdownTimer';
 import { FamilyMessageBoard } from '../shared/FamilyMessageBoard';
 import { KidDailyRecap } from './KidDailyRecap';
-import * as sounds from '../../lib/sounds';
+import * as audio from '../../lib/audio';
 
 type ViewType = 'tasks' | 'calendar' | 'stats' | 'allowance' | 'settings';
 
@@ -47,7 +47,7 @@ export function TeenDashboard() {
   }, [loadData]);
 
   const handleStartTimer = async (instance: TaskInstance) => {
-    sounds.playButtonClick();
+    audio.playButtonClick();
     try {
       await api.startTimer(instance.id);
       setActiveTimer({ ...instance, status: 'in_progress' });
@@ -61,7 +61,7 @@ export function TeenDashboard() {
   const handleCompleteTimed = async (instance: TaskInstance, elapsedSeconds: number) => {
     try {
       const result = await api.completeTask(instance.id, elapsedSeconds) as unknown as Record<string, unknown>;
-      sounds.playTaskComplete();
+      audio.playTaskComplete();
       const points = result.points_earned || 0;
       setMessage(`+${points} pts — Nice work!`);
       setActiveTimer(null);
@@ -89,7 +89,7 @@ export function TeenDashboard() {
   const handleComplete = async (instance: TaskInstance) => {
     try {
       const result = await api.completeTask(instance.id, 0) as unknown as Record<string, unknown>;
-      sounds.playTaskComplete();
+      audio.playTaskComplete();
       const points = result.points_earned || 0;
       setMessage(`+${points} pts — Nice work!`);
       setTimeout(() => setMessage(''), 3000);
