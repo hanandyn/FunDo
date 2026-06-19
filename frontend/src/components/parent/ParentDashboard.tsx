@@ -19,6 +19,7 @@ import { FamilyMessageBoard } from '../shared/FamilyMessageBoard';
 import { RitualSettings } from '../settings/RitualSettings';
 import { KidCredentialsPanel } from './KidCredentialsPanel';
 import { ParentTaskManagement } from './ParentTaskManagement';
+import { NLTaskCreator } from './NLTaskCreator';
 
 export function ParentDashboard() {
   const { user, logout } = useAuth();
@@ -263,11 +264,14 @@ export function ParentDashboard() {
         {/* Tasks Tab */}
         {activeTab === 'tasks' && (
           <div>
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex justify-between items-center mb-4 gap-2">
               <h2 className="text-xl font-bold">Task Templates ({templates.length})</h2>
-              <button onClick={() => setShowAddTask(true)} className="btn-primary">
-                + Create Task
-              </button>
+              <div className="flex gap-2">
+                <NLTaskCreator children={children} onCreated={() => { loadAll(); }} />
+                <button onClick={() => setShowAddTask(true)} className="btn-primary">
+                  + Create Task
+                </button>
+              </div>
             </div>
             <div className="space-y-3">
               {templates.map(tpl => (

@@ -5,6 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import type { TaskInstance, KidRecap, AllowanceStatus } from '../../lib/types';
 import { CountdownTimer } from '../timer/CountdownTimer';
 import { FamilyMessageBoard } from '../shared/FamilyMessageBoard';
+import { KidDailyRecap } from './KidDailyRecap';
 import * as sounds from '../../lib/sounds';
 
 type ViewType = 'tasks' | 'calendar' | 'stats' | 'allowance' | 'settings';
@@ -536,6 +537,11 @@ export function TeenDashboard() {
             </div>
           </motion.div>
         )}
+      </div>
+
+      {/* Daily Recap */}
+      <div className="max-w-2xl mx-auto px-4">
+        <KidDailyRecap />
       </div>
 
       {/* Family Message Board */}

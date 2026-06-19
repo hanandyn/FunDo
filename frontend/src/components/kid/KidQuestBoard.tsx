@@ -20,6 +20,7 @@ import { SchoolQuests } from './SchoolQuests';
 import { SeasonalBanner } from './SeasonalBanner';
 import { SettingsPanel } from '../settings/SettingsPanel';
 import { FamilyMessageBoard } from '../shared/FamilyMessageBoard';
+import { KidDailyRecap } from './KidDailyRecap';
 import heroImg from '../../assets/questkids-hero.jpg';
 import emptyImg from '../../assets/questkids-empty.jpg';
 import { useCheers } from '../../lib/useCheers';
@@ -649,6 +650,7 @@ export function KidQuestBoard() {
         {/* Phase 8: Family Board (shown on quests view) */}
         {activeView === 'quests' && (
           <div className="mt-6">
+            <KidDailyRecap />
             <FamilyMessageBoard />
           </div>
         )}

@@ -374,5 +374,18 @@
   },
   "common": {
     "cancel": "ביטול"
-  }
+  },
+  "recap.goodnight": "סיכום יום! 🌙",
+  "recap.tasks": "משימות",
+  "recap.earned": "הרווחת",
+  "recap.streak": "רצף",
+  "recap.completion": "השלמה",
+  "recap.highlights": "הישגים",
+  "recap.tomorrowTip": "מחר",
+  "parent.nlCreate": "תאר/י משימה",
+  "parent.nlCreateDesc": "תאר/י משימה במילים שלך",
+  "parent.parse": "פענח",
+  "parent.preview": "תצוגה מקדימה",
+  "parent.confidence": "ביטחון",
+  "parent.createTask": "צור/י משימה"
 }

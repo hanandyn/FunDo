@@ -52,6 +52,15 @@ export const api = {
   // Kid undo
   undoTask: (instanceId: number) => apiFetch(`/tasks/instances/${instanceId}/undo`, { method: 'POST' }),
 
+  // AI Intelligence Layer
+  getKidDailyRecap: (date?: string) => apiFetch(`/recap/daily/kid${date ? `?recap_date=${date}` : ''}`),
+  getFamilyDailyRecap: (date?: string) => apiFetch(`/recap/daily/family${date ? `?recap_date=${date}` : ''}`),
+  getStreakRiskAlerts: () => apiFetch('/alerts/streak-risk'),
+  getGoldenOpportunity: () => apiFetch('/alerts/golden-opportunity'),
+  getMilestoneAlerts: () => apiFetch('/alerts/milestones'),
+  getChoreBalance: () => apiFetch('/insights/chore-balance'),
+  parseNLTask: (text: string, childName?: string) => apiFetch('/tasks/parse-nl', { method: 'POST', body: JSON.stringify({ text, child_name: childName }) }),
+
   // Parent task management
   updateTaskStatus: (instanceId: number, status: string, notes?: string) => apiFetch(`/tasks/instances/${instanceId}/status`, {
     method: 'PUT',

@@ -530,5 +530,18 @@
   },
   "common": {
     "cancel": "Cancel"
-  }
+  },
+  "recap.goodnight": "Goodnight Recap!",
+  "recap.tasks": "Tasks",
+  "recap.earned": "Earned",
+  "recap.streak": "Streak",
+  "recap.completion": "Completion",
+  "recap.highlights": "Highlights",
+  "recap.tomorrowTip": "Tomorrow",
+  "parent.nlCreate": "Describe a Task",
+  "parent.nlCreateDesc": "Describe a task in your own words",
+  "parent.parse": "Parse",
+  "parent.preview": "Preview",
+  "parent.confidence": "confidence",
+  "parent.createTask": "Create Task"
 }
