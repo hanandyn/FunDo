@@ -52,11 +52,18 @@ services:
       retries: 3
       start_period: 10s
     restart: unless-stopped
+    networks:
+      - default
+      - coolify
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.questkids.rule=Host(`questkids.dayan.casa`)"
       - "traefik.http.routers.questkids.entrypoints=http"
       - "traefik.http.services.questkids.loadbalancer.server.port=80"
+
+networks:
+  coolify:
+    external: true
 
 volumes:
   questkids_data:
