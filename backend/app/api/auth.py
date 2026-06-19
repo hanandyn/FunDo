@@ -67,8 +67,8 @@ async def register_parent(
     if pw_error:
         raise HTTPException(status_code=400, detail=pw_error)
 
-    # Check existing username
-    result = await db.execute(select(User).where(User.username == data.username))
+    # Check existing username (case-insensitive)
+    result = await db.execute(select(User).where(User.username.ilike(data.username)))
     if result.scalar_one_or_none():
         raise HTTPException(status_code=400, detail="Username already taken")
 
@@ -109,7 +109,9 @@ async def login(
     """Login for any user (parent or child)."""
     await check_rate_limit(request, "5/minute", key="login")
 
-    result = await db.execute(select(User).where(User.username == data.username))
+    # Normalize username to lowercase for lookup
+    username_lookup = data.username.strip().lower()
+    result = await db.execute(select(User).where(User.username.ilike(username_lookup)))
     user = result.scalar_one_or_none()
 
     # Check account lockout
@@ -156,7 +158,7 @@ async def create_child(
     if not data.age_tier or data.age_tier < 1 or data.age_tier > 5:
         raise HTTPException(status_code=400, detail="Valid age_tier (1-5) required")
 
-    result = await db.execute(select(User).where(User.username == data.username))
+    result = await db.execute(select(User).where(User.username.ilike(data.username)))
     if result.scalar_one_or_none():
         raise HTTPException(status_code=400, detail="Username already taken")
 
