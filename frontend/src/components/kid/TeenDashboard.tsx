@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../../lib/api';
 import { useAuth } from '../../contexts/AuthContext';
 import type { TaskInstance, KidRecap, AllowanceStatus } from '../../lib/types';
+import { CountdownTimer } from '../timer/CountdownTimer';
 import * as sounds from '../../lib/sounds';
 
 type ViewType = 'tasks' | 'calendar' | 'stats' | 'allowance' | 'settings';
@@ -15,6 +16,7 @@ export function TeenDashboard() {
   const [recap, setRecap] = useState<KidRecap | null>(null);
   const [allowance, setAllowance] = useState<AllowanceStatus | null>(null);
   const [activeView, setActiveView] = useState<ViewType>('tasks');
+  const [activeTimer, setActiveTimer] = useState<TaskInstance | null>(null);
   const [message, setMessage] = useState('');
   const [accentColor, setAccentColor] = useState(ACCENT_COLORS[0]);
   const [pullRefreshing, setPullRefreshing] = useState(false);
@@ -41,6 +43,34 @@ export function TeenDashboard() {
     setPullRefreshing(true);
     await loadData();
   }, [loadData]);
+
+  const handleStartTimer = async (instance: TaskInstance) => {
+    sounds.playButtonClick();
+    try {
+      await api.startTimer(instance.id);
+      setActiveTimer({ ...instance, status: 'in_progress' });
+      loadData();
+    } catch (err: unknown) {
+      setMessage(err instanceof Error ? err.message : 'Something went wrong');
+      setTimeout(() => setMessage(''), 3000);
+    }
+  };
+
+  const handleCompleteTimed = async (instance: TaskInstance, elapsedSeconds: number) => {
+    try {
+      const result = await api.completeTask(instance.id, elapsedSeconds) as unknown as Record<string, unknown>;
+      sounds.playTaskComplete();
+      const points = result.points_earned || 0;
+      setMessage(`+${points} pts — Nice work!`);
+      setActiveTimer(null);
+      setTimeout(() => setMessage(''), 3000);
+      loadData();
+    } catch (err: unknown) {
+      setMessage(err instanceof Error ? err.message : 'Error');
+      setActiveTimer(null);
+      setTimeout(() => setMessage(''), 3000);
+    }
+  };
 
   const handleComplete = async (instance: TaskInstance) => {
     try {
@@ -234,11 +264,11 @@ export function TeenDashboard() {
                           </div>
                         </div>
                         <button
-                          onClick={() => handleComplete(inst)}
+                          onClick={() => inst.template?.task_type === 'timed' ? handleStartTimer(inst) : handleComplete(inst)}
                           className="px-4 py-2 rounded-lg text-sm font-medium transition-all hover:opacity-90 text-white"
                           style={{ backgroundColor: accentColor }}
                         >
-                          ✓ Done
+                          {inst.template?.task_type === 'timed' ? '▶ Start' : '✓ Done'}
                         </button>
                       </motion.div>
                     ))}
@@ -497,6 +527,15 @@ export function TeenDashboard() {
           }
         }}
       />
+
+      {/* Timer overlay for timed tasks */}
+      {activeTimer && (
+        <CountdownTimer
+          instance={activeTimer}
+          onComplete={(elapsed) => handleCompleteTimed(activeTimer, elapsed)}
+          onCancel={() => setActiveTimer(null)}
+        />
+      )}
     </div>
   );
 }
