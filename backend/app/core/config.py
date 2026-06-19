@@ -20,7 +20,12 @@ class Settings(BaseSettings):
     @property
     def cors_origins_list(self) -> list[str]:
         """Parse comma-separated CORS_ORIGINS into a list for FastAPI middleware."""
-        return [o.strip() for o in self.CORS_ORIGINS.split(",") if o.strip()]
+        origins = [o.strip() for o in self.CORS_ORIGINS.split(",") if o.strip()]
+        # Always include the production domain (belt-and-suspenders for Coolify env propagation)
+        production_origin = "https://questkids.dayan.casa"
+        if production_origin not in origins:
+            origins.append(production_origin)
+        return origins
 
     # File storage path
     UPLOAD_DIR: str = "./uploads"
