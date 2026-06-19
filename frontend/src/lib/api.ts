@@ -233,6 +233,11 @@ export const api = {
   getChildExportPdfUrl: (childId: number) => `/api/v1/analytics/child/${childId}/export/pdf`,
   getFamilyExportCsvUrl: () => `/api/v1/analytics/family/export/csv`,
 
+  // Phase 9: Onboarding Wizard
+  onboardingTemplates: (ageTiers?: string) => apiFetch(`/onboarding/templates${ageTiers ? `?age_tiers=${ageTiers}` : ''}`),
+  onboardingStatus: () => apiFetch('/onboarding/status'),
+  completeOnboarding: () => apiFetch('/onboarding/complete', { method: 'POST' }),
+
   // Phase 8: Reward Fulfillment
   fulfillRedemption: (id: number, notes?: string) => apiFetch(`/rewards/redemptions/${id}/fulfill`, { method: 'POST', body: JSON.stringify({ notes }) }),
   cancelRedemption: (id: number) => apiFetch(`/rewards/redemptions/${id}/cancel`, { method: 'POST' }),

@@ -1,14 +1,10 @@
 /* eslint-disable react-hooks/immutability */
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense, useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ToastProvider } from './components/shared/Toast';
 import { LoginPage } from './components/auth/LoginPage';
 import { EmailVerificationPage } from './components/auth/EmailVerificationPage';
-import { ParentDashboard } from './components/parent/ParentDashboard';
-import { KidQuestBoard } from './components/kid/KidQuestBoard';
-import { TeenDashboard } from './components/kid/TeenDashboard';
-import { LittleExplorerDashboard } from './components/kid/LittleExplorerDashboard';
 import { ShabbatBanner } from './components/kid/ShabbatBanner';
 import { RitualBanner } from './components/shared/RitualBanner';
 import { setLanguageDirection, SUPPORTED_LANGUAGES } from './lib/i18n';
@@ -16,9 +12,43 @@ import { api } from './lib/api';
 import { useTranslation } from 'react-i18next';
 import type { ThemePreferences } from './lib/types';
 
+// Phase 9: Lazy-loaded routes for code splitting (via default-export wrappers in src/lazy/)
+const OnboardingWizard = lazy(() => import('./components/onboarding/OnboardingWizard'));
+const KidQuestBoard = lazy(() => import('./lazy/KidQuestBoard'));
+const TeenDashboard = lazy(() => import('./lazy/TeenDashboard'));
+const LittleExplorerDashboard = lazy(() => import('./lazy/LittleExplorerDashboard'));
+const ParentDashboard = lazy(() => import('./lazy/ParentDashboard'));
+const MarketplacePage = lazy(() => import('./lazy/TemplateMarketplace'));
+const AnalyticsDashboardPage = lazy(() => import('./lazy/AnalyticsDashboard'));
+const SettingsPage = lazy(() => import('./lazy/SettingsPanel'));
+const CalendarPage = lazy(() => import('./lazy/CalendarPage'));
+const InsightsPage = lazy(() => import('./lazy/InsightsDashboard'));
+const SmartSuggestionsPage = lazy(() => import('./lazy/SmartSuggestionsPanel'));
+const AdminMetricsPage = lazy(() => import('./lazy/AdminMetricsPanel'));
+const FulfillmentPage = lazy(() => import('./lazy/FulfillmentQueue'));
+const OrganizationsPage = lazy(() => import('./lazy/OrganizationDashboard'));
+const EnhancedSchedulerPage = lazy(() => import('./lazy/EnhancedScheduler'));
+const AllowanceSettingsPage = lazy(() => import('./lazy/AllowanceSettings'));
+const TeacherDashboardPage = lazy(() => import('./lazy/TeacherDashboard'));
+const NotificationPrefsPage = lazy(() => import('./lazy/NotificationPreferences'));
+const RitualSettingsPage = lazy(() => import('./lazy/RitualSettings'));
+const IntegrationsSettingsPage = lazy(() => import('./lazy/IntegrationsSettings'));
+
+// Phase 9: Shared components still eagerly loaded (needed everywhere)
+const LoadingFallback = () => (
+  <div className="min-h-screen flex items-center justify-center bg-quest-bg">
+    <div className="text-center">
+      <div className="text-7xl animate-bounce">🏰</div>
+      <p className="text-xl text-gray-500 mt-4">Loading...</p>
+    </div>
+  </div>
+);
+
 function AppContent() {
   const { user, loading } = useAuth();
   const { t } = useTranslation();
+  const [onboardingNeeded, setOnboardingNeeded] = useState(false);
+  const [onboardingChecked, setOnboardingChecked] = useState(false);
 
   // Apply theme and direction on mount
   useEffect(() => {
@@ -34,6 +64,21 @@ function AppContent() {
       })
       .catch(() => {});
   }, []);
+
+  // Phase 9: Check if parent needs onboarding
+  useEffect(() => {
+    if (!loading && user?.role === 'parent') {
+      api.onboardingStatus()
+        .then((r: unknown) => {
+          const res = r as { completed: boolean };
+          setOnboardingNeeded(!res.completed);
+        })
+        .catch(() => {})
+        .finally(() => setOnboardingChecked(true));
+    } else if (!loading && user) {
+      setOnboardingChecked(true);
+    }
+  }, [user, loading]);
 
   // Re-apply theme when user data changes
   useEffect(() => {
@@ -64,7 +109,7 @@ function AppContent() {
     if (prefs.high_contrast) html.classList.add('high-contrast');
   };
 
-  if (loading) {
+  if (loading || (user?.role === 'parent' && !onboardingChecked)) {
     return (
       <main id="main-content" className="min-h-screen flex items-center justify-center bg-quest-bg">
         <div className="text-center">
@@ -86,44 +131,71 @@ function AppContent() {
     );
   }
 
+  // Phase 9: Show onboarding wizard for new parents
+  if (user.role === 'parent' && onboardingNeeded) {
+    return (
+      <Suspense fallback={<LoadingFallback />}>
+        <OnboardingWizard />
+      </Suspense>
+    );
+  }
+
   // Phase 7: Tier 1 (ages 3-5) → Little Explorer Dashboard
   if (user.role === 'child' && user.age_tier && user.age_tier <= 2) {
     return (
-      <>
+      <Suspense fallback={<LoadingFallback />}>
         <ShabbatBanner />
         <RitualBanner />
         <LittleExplorerDashboard />
-      </>
+      </Suspense>
     );
   }
 
   // Tier 5 teens (ages 13+) get their own dashboard
   if (user.role === 'child' && (user.age_tier || 0) >= 5) {
     return (
-      <>
+      <Suspense fallback={<LoadingFallback />}>
         <ShabbatBanner />
         <RitualBanner />
         <TeenDashboard />
-      </>
+      </Suspense>
     );
   }
 
   if (user.role === 'parent') {
     return (
-      <>
+      <Suspense fallback={<LoadingFallback />}>
         <ShabbatBanner />
         <RitualBanner />
-        <ParentDashboard />
-      </>
+        {/* Phase 9: Parent view with lazy-loaded sub-routes */}
+        <Routes>
+          <Route path="/marketplace" element={<MarketplacePage />} />
+          <Route path="/analytics" element={<AnalyticsDashboardPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/calendar" element={<CalendarPage />} />
+          <Route path="/insights" element={<InsightsPage />} />
+          <Route path="/suggestions" element={<SmartSuggestionsPage />} />
+          <Route path="/admin" element={<AdminMetricsPage />} />
+          <Route path="/fulfillment" element={<FulfillmentPage />} />
+          <Route path="/organizations" element={<OrganizationsPage />} />
+          <Route path="/scheduler" element={<EnhancedSchedulerPage />} />
+          <Route path="/allowance-settings" element={<AllowanceSettingsPage />} />
+          <Route path="/teacher" element={<TeacherDashboardPage />} />
+          <Route path="/notification-prefs" element={<NotificationPrefsPage />} />
+          <Route path="/ritual-settings" element={<RitualSettingsPage />} />
+          <Route path="/integrations" element={<IntegrationsSettingsPage />} />
+          <Route path="*" element={<ParentDashboard />} />
+        </Routes>
+      </Suspense>
     );
   }
 
   return (
-    <>
+    <Suspense fallback={<LoadingFallback />}>
       <ShabbatBanner />
       <RitualBanner />
       <KidQuestBoard />
-    </>
+    </Suspense>
   );
 }
 

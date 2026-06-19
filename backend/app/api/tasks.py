@@ -1,9 +1,10 @@
 """Task API routes."""
 
 import os
+from typing import Optional
 import uuid
 from datetime import datetime, timezone
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form, Query
 from fastapi.responses import FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
@@ -60,16 +61,43 @@ async def create_task_template(
 
 
 @router.get("/templates", response_model=list[TaskTemplateResponse])
-async def get_task_templates(
+async def get_task_templates(  # Phase 9: enhanced search/filter/sort
+    search: Optional[str] = Query(None, description="Search by name"),
+    category: Optional[str] = Query(None, description="Filter by category"),
+    task_type: Optional[str] = Query(None, description="Filter by task type"),
+    age_tier_min: Optional[int] = Query(None, description="Minimum age tier"),
+    age_tier_max: Optional[int] = Query(None, description="Maximum age tier"),
+    sort_by: Optional[str] = Query("created_at", description="Sort field: name, created_at, base_points"),
+    sort_order: Optional[str] = Query("desc", description="Sort direction: asc or desc"),
     current_user: User = Depends(get_current_parent),
     db: AsyncSession = Depends(get_db),
 ):
     """Get all task templates for the family."""
-    result = await db.execute(
-        select(TaskTemplate).where(
-            and_(TaskTemplate.family_id == current_user.family_id, TaskTemplate.is_active == True)
-        )
-    )
+    conditions = [TaskTemplate.family_id == current_user.family_id, TaskTemplate.is_active == True]
+    
+    # Phase 9: Search by name
+    if search:
+        conditions.append(TaskTemplate.name.ilike(f"%{search}%"))
+    
+    # Phase 9: Filter by category
+    if category:
+        conditions.append(TaskTemplate.category == category)
+    
+    # Phase 9: Filter by task type
+    if task_type:
+        conditions.append(TaskTemplate.task_type == task_type)
+    
+    # Phase 9: Filter by age tier range
+    if age_tier_min is not None:
+        conditions.append(TaskTemplate.age_tier_max >= age_tier_min)
+    if age_tier_max is not None:
+        conditions.append(TaskTemplate.age_tier_min <= age_tier_max)
+    
+    # Phase 9: Sort
+    sort_col = getattr(TaskTemplate, sort_by, TaskTemplate.created_at)
+    order = sort_col.asc() if sort_order == "asc" else sort_col.desc()
+    
+    result = await db.execute(select(TaskTemplate).where(and_(*conditions)).order_by(order))
     templates = result.scalars().all()
     return [TaskTemplateResponse.model_validate(t) for t in templates]
 

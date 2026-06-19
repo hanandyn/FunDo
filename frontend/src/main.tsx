@@ -21,6 +21,8 @@ function Root() {
 
   return (
     <React.StrictMode>
+      {/* Phase 9: Skip to content link for accessibility */}
+      <a href="#main-content" className="skip-to-content">Skip to content</a>
       <App />
     </React.StrictMode>
   );

@@ -114,8 +114,8 @@ async def login(
     # Check account lockout
     from datetime import datetime, timezone
     if user and user.locked_until:
-        if user.locked_until > datetime.now(timezone.utc):
-            remaining = int((user.locked_until - datetime.now(timezone.utc)).total_seconds() / 60) + 1
+        if user.locked_until.replace(tzinfo=timezone.utc) > datetime.now(timezone.utc):
+            remaining = int((user.locked_until.replace(tzinfo=timezone.utc) - datetime.now(timezone.utc)).total_seconds() / 60) + 1
             raise HTTPException(
                 status_code=423,
                 detail=f"Account locked. Try again in {remaining} minutes.",
