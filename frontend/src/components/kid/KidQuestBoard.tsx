@@ -87,7 +87,7 @@ export function KidQuestBoard() {
   };
 
   const handleSoundToggle = () => {
-    const newMuted = sounds.toggleMute();
+    const newMuted = audio.toggleMute();
     setMuted(newMuted);
   };
 
