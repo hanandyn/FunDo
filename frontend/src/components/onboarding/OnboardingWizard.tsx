@@ -411,8 +411,20 @@ function DoneStep({ data, onPrev }: StepProps) {
 
       setDone(true);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : typeof err === 'object' && err !== null && 'message' in err ? (err as {message: string}).message : typeof err === 'object' && err !== null && 'detail' in err ? (err as {detail: string}).detail : 'Something went wrong';
-      setError(msg);
+      if (err instanceof Error) {
+        setError(err.message);
+      } else if (typeof err === 'object' && err !== null) {
+        // FastAPI HTTPException: { detail: string } or { detail: [] }
+        if ('detail' in err) {
+          const detail = (err as {detail: unknown}).detail;
+          const msg = Array.isArray(detail) && detail.length > 0 ? detail.map((e: any) => e.msg && typeof e.msg === 'string' ? e.msg : JSON.stringify(e)).join(', ') : typeof detail === 'string' ? detail : JSON.stringify(err);
+          setError(msg);
+        } else {
+          setError(JSON.stringify(err, null, 2));
+        }
+      } else {
+        setError('Something went wrong');
+      }
     } finally {
       setCreating(false);
     }
