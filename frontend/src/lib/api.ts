@@ -189,4 +189,24 @@ export const api = {
 
   // Phase 6: Health
   getDetailedHealth: () => apiFetch('/health/detailed'),
+
+  // Phase 7: Tier 1 (Little Explorers)
+  getTier1Tasks: () => apiFetch('/tier1/tasks'),
+  completeTier1Task: (id: number) => apiFetch(`/tier1/tasks/${id}/complete`, { method: 'POST' }),
+  getPetState: () => apiFetch('/tier1/pet-state'),
+
+  // Phase 7: Avatar Shop
+  getAvatarShop: () => apiFetch('/avatars/shop'),
+  getOwnedAvatarItems: () => apiFetch('/avatars/items'),
+  buyAvatarItem: (id: number) => apiFetch(`/avatars/shop/${id}/buy`, { method: 'POST' }),
+  equipAvatarItem: (childItemId: number) => apiFetch(`/avatars/equip/${childItemId}`, { method: 'POST' }),
+  unequipAvatarItem: (childItemId: number) => apiFetch(`/avatars/unequip/${childItemId}`, { method: 'POST' }),
+
+  // Phase 7: Allowance
+  getAllowanceStatus: () => apiFetch('/allowance/status'),
+  setSavingsGoal: (goal: number) => apiFetch('/allowance/goal', { method: 'POST', body: JSON.stringify({ goal }) }),
+  updateAllowanceSettings: (data: { child_id: number; allowance_rate: number; allowance_currency: string; savings_goal: number }) => apiFetch('/allowance/settings', { method: 'PUT', body: JSON.stringify(data) }),
+
+  // Phase 7: Notification Preferences
+  getNotificationPreferences: () => apiFetch('/notifications/preferences'),
 };

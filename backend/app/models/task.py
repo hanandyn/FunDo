@@ -49,6 +49,10 @@ class TaskTemplate(Base):
     community_rating = Column(Integer, default=0)  # total rating score
     community_ratings_count = Column(Integer, default=0)  # number of ratings
     
+    # Tier 1 (Little Explorers) — pre-reader support
+    icon = Column(String, nullable=True)  # emoji or icon name for pre-readers
+    audio_prompt = Column(String, nullable=True)  # TTS text for voice guidance
+    
     # Other settings
     age_tier_min = Column(Integer, default=1)
     age_tier_max = Column(Integer, default=5)

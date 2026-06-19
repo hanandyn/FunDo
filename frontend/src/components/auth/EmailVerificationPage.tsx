@@ -13,6 +13,7 @@ export function EmailVerificationPage() {
 
   useEffect(() => {
     if (!token) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setStatus('error');
       setMessage(t('emailVerification.missingToken'));
       return;

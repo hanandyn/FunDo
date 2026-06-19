@@ -33,6 +33,11 @@ class User(Base):
     last_daily_spin = Column(DateTime(timezone=True), nullable=True)
     completed_since_last_chest = Column(Integer, default=0)
     total_tasks_completed = Column(Integer, default=0)  # denormalized for achievement tracking
+    # Allowance (Phase 7) — teens link stars to real money
+    allowance_rate = Column(Integer, default=0)  # stars per currency unit, 0 = disabled
+    allowance_currency = Column(String, default="USD")
+    savings_goal = Column(Integer, default=0)  # in currency units
+    
     email_verified = Column(Boolean, default=False)
     verification_token = Column(String, nullable=True)
 

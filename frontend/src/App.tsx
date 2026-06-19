@@ -2,11 +2,13 @@
 import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { ToastProvider } from './components/shared/Toast';
 import { LoginPage } from './components/auth/LoginPage';
 import { EmailVerificationPage } from './components/auth/EmailVerificationPage';
 import { ParentDashboard } from './components/parent/ParentDashboard';
 import { KidQuestBoard } from './components/kid/KidQuestBoard';
 import { TeenDashboard } from './components/kid/TeenDashboard';
+import { LittleExplorerDashboard } from './components/kid/LittleExplorerDashboard';
 import { ShabbatBanner } from './components/kid/ShabbatBanner';
 import { setLanguageDirection, SUPPORTED_LANGUAGES } from './lib/i18n';
 import { api } from './lib/api';
@@ -83,7 +85,17 @@ function AppContent() {
     );
   }
 
-  // Tier 5 teens get their own dashboard
+  // Phase 7: Tier 1 (ages 3-5) → Little Explorer Dashboard
+  if (user.role === 'child' && user.age_tier && user.age_tier <= 2) {
+    return (
+      <>
+        <ShabbatBanner />
+        <LittleExplorerDashboard />
+      </>
+    );
+  }
+
+  // Tier 5 teens (ages 13+) get their own dashboard
   if (user.role === 'child' && (user.age_tier || 0) >= 5) {
     return (
       <>
@@ -114,7 +126,9 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AppContent />
+        <ToastProvider>
+          <AppContent />
+        </ToastProvider>
       </AuthProvider>
     </BrowserRouter>
   );

@@ -17,6 +17,9 @@ export interface User {
   theme_preference?: string;
   handicap_multiplier: number;
   total_tasks_completed?: number;
+  allowance_rate?: number;
+  allowance_currency?: string;
+  savings_goal?: number;
 }
 
 export interface TaskTemplate {
@@ -459,4 +462,103 @@ export interface AdminMetrics {
   family_count: number;
   tasks_completed_today: number;
   active_streaks: number;
+}
+
+// Phase 7: Tier 1 — Little Explorers
+export interface Tier1Task {
+  id: number;
+  template_id: number;
+  icon: string;
+  audio_prompt: string;
+  category: string;
+  status: string;
+  task_type: string;
+  timer_duration?: number;
+  points: number;
+}
+
+export interface Tier1TasksResponse {
+  tasks: Tier1Task[];
+  total_pending: number;
+  child_name: string;
+  stars: number;
+  gems: number;
+  level: number;
+}
+
+export interface PetState {
+  pet: {
+    stage: string;
+    emoji: string;
+    mood: string;
+    expression: string;
+  };
+  stats: {
+    level: number;
+    stars: number;
+    gems: number;
+    streak: number;
+    tasks_completed_today: number;
+  };
+  stickers: Array<{ icon: string; name: string }>;
+  world_brightness: number;
+}
+
+// Phase 7: Avatar Shop
+export interface AvatarShopItem {
+  id: number;
+  item_name: string;
+  item_type: 'outfit' | 'pet' | 'accessory' | 'background' | 'name_color' | 'emote';
+  slot: string;
+  rarity: 'common' | 'rare' | 'epic' | 'legendary';
+  emoji?: string;
+  color?: string;
+  cost_gems: number;
+  cost_stars: number;
+  owned: boolean;
+}
+
+export interface OwnedAvatarItem {
+  id: number;
+  item_id: number;
+  item_name: string;
+  item_type: string;
+  slot: string;
+  rarity: string;
+  emoji?: string;
+  color?: string;
+  equipped: number;
+  acquired_at?: string;
+}
+
+export interface BuyResult {
+  message: string;
+  item_id: number;
+  item_name: string;
+  gems_remaining: number;
+  stars_remaining: number;
+}
+
+// Phase 7: Allowance
+export interface AllowanceStatus {
+  allowance_rate: number;
+  currency: string;
+  stars: number;
+  allowance_amount: number;
+  savings_goal: number;
+  progress_percent: number;
+  enabled: boolean;
+}
+
+// Phase 7: Notification Preferences
+export interface NotificationPreferences {
+  task_complete: boolean;
+  level_up: boolean;
+  achievement: boolean;
+  streak_risk: boolean;
+  leaderboard: boolean;
+  cheer_received: boolean;
+  family_goal: boolean;
+  sounds: boolean;
+  toasts: boolean;
 }

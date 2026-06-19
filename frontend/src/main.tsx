@@ -10,6 +10,13 @@ function Root() {
   useEffect(() => {
     const dir = localStorage.getItem('questkids_lang') === 'he' ? 'rtl' : 'ltr';
     setLanguageDirection(dir);
+
+    // Register service worker for PWA
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+        .then(() => console.log('SW registered'))
+        .catch(() => console.log('SW registration failed'));
+    }
   }, []);
 
   return (

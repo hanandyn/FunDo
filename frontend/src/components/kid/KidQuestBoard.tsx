@@ -254,7 +254,7 @@ export function KidQuestBoard() {
             <h1 className="text-xl font-bold flex items-center gap-2 cursor-pointer"
               onClick={() => { sounds.playButtonClick(); setActiveView('quests'); }}
             >
-              🏰 QuestKids <span className="text-xs text-gray-300 ml-1">v0.6.0</span>
+              🏰 QuestKids <span className="text-xs text-gray-300 ml-1">v0.7.0</span>
             </h1>
             <div className="flex items-center gap-2 text-sm">
               <NotificationBell />

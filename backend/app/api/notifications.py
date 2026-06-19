@@ -3,7 +3,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
-from sqlalchemy.orm import selectinload
 
 from ..core.database import get_db
 from ..core.auth import get_current_user
@@ -58,6 +57,24 @@ async def unread_count(
     )
     count = result.scalar() or 0
     return {"unread_count": count}
+
+
+@router.get("/preferences")
+async def get_notification_preferences(
+    current_user: User = Depends(get_current_user),
+):
+    """Get notification preferences (stored in localStorage server-side defaults)."""
+    return {
+        "task_complete": True,
+        "level_up": True,
+        "achievement": True,
+        "streak_risk": True,
+        "leaderboard": True,
+        "cheer_received": True,
+        "family_goal": True,
+        "sounds": True,
+        "toasts": True,
+    }
 
 
 @router.post("/{notification_id}/read")

@@ -29,6 +29,8 @@ class TaskTemplateCreate(BaseModel):
     age_tier_max: int = 5
     requires_photo: bool = False
     requires_approval: bool = False
+    icon: Optional[str] = None  # emoji or icon name for pre-readers
+    audio_prompt: Optional[str] = None  # TTS text for voice guidance
     assigned_child_ids: Optional[List[int]] = None  # kids assigned to this task
     public: bool = False  # share to marketplace
 
@@ -72,6 +74,8 @@ class TaskTemplateResponse(BaseModel):
     age_tier_max: int
     requires_photo: bool
     requires_approval: bool
+    icon: Optional[str] = None
+    audio_prompt: Optional[str] = None
     is_active: bool
     public: bool = False
     community_rating: int = 0

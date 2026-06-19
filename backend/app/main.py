@@ -12,9 +12,10 @@ from slowapi.errors import RateLimitExceeded
 
 from .core.config import settings
 from .core.database import create_tables, async_session, engine
-from .models import User, Family, TaskTemplate, TaskInstance, Reward, RewardRedemption, StreakHistory, Achievement, ChildAchievement, FamilyGoal, FamilyGoalProgress, Cheer, PowerUp, PowerUpPurchase, Organization, OrganizationMember, ApiKey, SeasonalEvent, HomeworkAssignment, Notification  # noqa: F401
+from .models import User, Family, TaskTemplate, TaskInstance, Reward, RewardRedemption, StreakHistory, Achievement, ChildAchievement, FamilyGoal, FamilyGoalProgress, Cheer, PowerUp, PowerUpPurchase, Organization, OrganizationMember, ApiKey, SeasonalEvent, HomeworkAssignment, Notification, AvatarItem, ChildAvatarItem  # noqa: F401
 from .api import auth, tasks, rewards, leaderboard, achievements, family_goals, cheers, recap, powerups, settings as settings_api
 from .api import organizations, templates_marketplace, integrations, external, school, calendar, events, notifications, admin_metrics
+from .api import tier1, avatars, allowance
 
 # Rate limiter
 limiter = Limiter(key_func=get_remote_address, default_limits=["200/minute"])
@@ -29,17 +30,19 @@ async def lifespan(app: FastAPI):
     from .services.powerups import seed_powerups
     from .services.achievements import seed_achievements
     from .scripts.seed_events import seed_seasonal_events
+    from .services.avatars import seed_avatar_items
     async with async_session() as db:
         await seed_powerups(db)
         await seed_achievements(db)
         await seed_seasonal_events(db)
+        await seed_avatar_items(db)
 
     yield
 
 
 app = FastAPI(
     title=settings.APP_NAME,
-    version="0.6.0",
+    version="0.7.0",
     lifespan=lifespan,
 )
 
@@ -95,6 +98,11 @@ app.include_router(events.router, prefix="/api/v1")
 app.include_router(notifications.router, prefix="/api/v1")
 app.include_router(admin_metrics.router, prefix="/api/v1")
 
+# Phase 7 routes
+app.include_router(tier1.router, prefix="/api/v1")
+app.include_router(avatars.router, prefix="/api/v1")
+app.include_router(allowance.router, prefix="/api/v1")
+
 
 @app.get("/api/v1/health")
 async def health_check():
@@ -109,7 +117,7 @@ async def health_check():
 
     return {
         "status": "ok" if db_ok else "degraded",
-        "version": "0.6.0",
+        "version": "0.7.0",
         "database": "connected" if db_ok else "disconnected",
     }
 
@@ -142,7 +150,7 @@ async def health_detailed():
 
     return {
         "status": "ok" if db_ok else "degraded",
-        "version": "0.6.0",
+        "version": "0.7.0",
         "database": {
             "connected": db_ok,
             "latency_ms": db_latency_ms,
