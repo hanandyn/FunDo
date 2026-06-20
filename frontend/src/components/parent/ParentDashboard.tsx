@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { api } from '../../lib/api';
-import type { User, TaskTemplate, Reward } from '../../lib/types';
+import type { User, TaskTemplate, Reward, Redemption } from '../../lib/types';
 import { useAuth } from '../../contexts/AuthContext';
 import { FamilyGoalsPanel } from '../kid/FamilyGoals';
 import { WeeklyRecap } from '../kid/WeeklyRecap';
@@ -34,6 +34,12 @@ type RewardRequest = {
   child_id: number;
 };
 
+type PendingApproval = {
+  id: number;
+  template_name: string;
+  child_name: string;
+};
+
 export function ParentDashboard() {
   const { user, logout } = useAuth();
   const [children, setChildren] = useState<User[]>([]);
@@ -45,6 +51,8 @@ export function ParentDashboard() {
   const [showAddReward, setShowAddReward] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<TaskTemplate | null>(null);
   const [rewardRequests, setRewardRequests] = useState<RewardRequest[]>([]);
+  const [pendingApprovals, setPendingApprovals] = useState<PendingApproval[]>([]);
+  const [pendingFulfillments, setPendingFulfillments] = useState<Redemption[]>([]);
 
   // Child form
   const [childName, setChildName] = useState('');
@@ -79,16 +87,20 @@ export function ParentDashboard() {
 
   const loadData = useCallback(async () => {
     try {
-      const [c, t, r, rr] = await Promise.all([
+      const [c, t, r, rr, pa, pf] = await Promise.all([
         api.getChildren(),
         api.getTemplates(),
         api.getRewards(),
         api.getRewardRequests().catch(() => []),
+        api.getPendingApprovals().catch(() => []),
+        api.getPendingRedemptions().catch(() => []),
       ]);
       setChildren(c as unknown as User[]);
       setTemplates(t as unknown as TaskTemplate[]);
       setRewards(r as unknown as Reward[]);
       setRewardRequests(rr as unknown as RewardRequest[]);
+      setPendingApprovals(pa as unknown as PendingApproval[]);
+      setPendingFulfillments(pf as unknown as Redemption[]);
     } catch (e) {
       console.error(e);
     }
@@ -237,6 +249,14 @@ export function ParentDashboard() {
     loadData();
   };
 
+  const pendingRewardRequests = rewardRequests.filter(r => r.status === 'pending');
+  const totalActionItems = pendingApprovals.length + pendingFulfillments.length + pendingRewardRequests.length;
+  const totalStars = children.reduce((sum, child) => sum + child.stars, 0);
+  const bestStreak = children.reduce((max, child) => Math.max(max, child.current_streak || 0), 0);
+  const avgLevel = children.length
+    ? Math.round(children.reduce((sum, child) => sum + (child.level || 0), 0) / children.length)
+    : 0;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-blue-50">
       {/* Header */}
@@ -285,6 +305,99 @@ export function ParentDashboard() {
         {/* Children Tab */}
         {activeTab === 'children' && (
           <div>
+            <section className="mb-6 rounded-2xl bg-white border border-indigo-100 shadow-sm p-4 md:p-5">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-indigo-400">Today</p>
+                  <h2 className="text-2xl font-bold text-gray-900">Parent Command Center</h2>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {totalActionItems > 0
+                      ? `${totalActionItems} item${totalActionItems !== 1 ? 's' : ''} need attention.`
+                      : 'All urgent parent actions are clear.'}
+                  </p>
+                </div>
+                <button
+                  onClick={loadData}
+                  className="self-start md:self-auto px-4 py-2 rounded-xl bg-indigo-50 text-indigo-600 text-sm font-semibold hover:bg-indigo-100 transition-colors"
+                >
+                  🔄 Refresh
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 lg:grid-cols-6 gap-3 mb-4">
+                <button
+                  onClick={() => setActiveTab('approvals')}
+                  className={`text-left rounded-xl border p-3 transition-colors ${pendingApprovals.length > 0 ? 'bg-amber-50 border-amber-200 hover:bg-amber-100' : 'bg-gray-50 border-gray-100 hover:bg-gray-100'}`}
+                >
+                  <div className="text-2xl font-bold text-gray-900">{pendingApprovals.length}</div>
+                  <div className="text-xs font-semibold text-gray-500">📸 Approvals</div>
+                </button>
+                <button
+                  onClick={() => setActiveTab('children')}
+                  className={`text-left rounded-xl border p-3 transition-colors ${pendingFulfillments.length > 0 ? 'bg-purple-50 border-purple-200 hover:bg-purple-100' : 'bg-gray-50 border-gray-100 hover:bg-gray-100'}`}
+                >
+                  <div className="text-2xl font-bold text-gray-900">{pendingFulfillments.length}</div>
+                  <div className="text-xs font-semibold text-gray-500">🎁 Deliveries</div>
+                </button>
+                <button
+                  onClick={() => setActiveTab('rewards')}
+                  className={`text-left rounded-xl border p-3 transition-colors ${pendingRewardRequests.length > 0 ? 'bg-pink-50 border-pink-200 hover:bg-pink-100' : 'bg-gray-50 border-gray-100 hover:bg-gray-100'}`}
+                >
+                  <div className="text-2xl font-bold text-gray-900">{pendingRewardRequests.length}</div>
+                  <div className="text-xs font-semibold text-gray-500">💌 Requests</div>
+                </button>
+                <button
+                  onClick={() => setActiveTab('tasks')}
+                  className="text-left rounded-xl border border-gray-100 bg-gray-50 p-3 hover:bg-gray-100 transition-colors"
+                >
+                  <div className="text-2xl font-bold text-gray-900">{templates.length}</div>
+                  <div className="text-xs font-semibold text-gray-500">📋 Tasks</div>
+                </button>
+                <div className="rounded-xl border border-gray-100 bg-gray-50 p-3">
+                  <div className="text-2xl font-bold text-gray-900">{totalStars}</div>
+                  <div className="text-xs font-semibold text-gray-500">⭐ Family Stars</div>
+                </div>
+                <div className="rounded-xl border border-gray-100 bg-gray-50 p-3">
+                  <div className="text-2xl font-bold text-gray-900">{bestStreak}</div>
+                  <div className="text-xs font-semibold text-gray-500">🔥 Best Streak</div>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => { setActiveTab('tasks'); setShowAddTask(true); }}
+                  className="px-4 py-2 rounded-xl bg-quest-blue text-white text-sm font-semibold hover:bg-blue-600 transition-colors"
+                >
+                  + Create Task
+                </button>
+                <button
+                  onClick={() => { setActiveTab('rewards'); setShowAddReward(true); }}
+                  className="px-4 py-2 rounded-xl bg-white border border-gray-200 text-gray-700 text-sm font-semibold hover:bg-gray-50 transition-colors"
+                >
+                  + Add Reward
+                </button>
+                <button
+                  onClick={() => setActiveTab('manage')}
+                  className="px-4 py-2 rounded-xl bg-white border border-gray-200 text-gray-700 text-sm font-semibold hover:bg-gray-50 transition-colors"
+                >
+                  Manage Tasks
+                </button>
+                <button
+                  onClick={() => setActiveTab('suggestions')}
+                  className="px-4 py-2 rounded-xl bg-white border border-gray-200 text-gray-700 text-sm font-semibold hover:bg-gray-50 transition-colors"
+                >
+                  Smart Tips
+                </button>
+                <span className="px-4 py-2 rounded-xl bg-indigo-50 text-indigo-500 text-sm font-semibold">
+                  Avg level {avgLevel || '-'}
+                </span>
+              </div>
+            </section>
+
+            <div className="mb-6">
+              <FulfillmentQueue />
+            </div>
+
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">My Children ({children.length})</h2>
               <button onClick={() => setShowAddChild(true)} className="btn-primary">
@@ -683,11 +796,11 @@ export function ParentDashboard() {
             )}
 
             {/* Kid Reward Requests */}
-            {rewardRequests.filter(r => r.status === 'pending').length > 0 && (
+            {pendingRewardRequests.length > 0 && (
               <div className="mt-6">
                 <h3 className="text-lg font-bold mb-3">💌 Reward Requests from Kids</h3>
                 <div className="space-y-2">
-                  {rewardRequests.filter(r => r.status === 'pending').map(req => {
+                  {pendingRewardRequests.map(req => {
                     const child = children.find(c => c.id === req.child_id);
                     return (
                       <div key={req.id} className="card-quest bg-gradient-to-br from-purple-50 to-pink-50">
@@ -757,7 +870,6 @@ export function ParentDashboard() {
         {/* Phase 8: Fulfillment Queue + Family Board (shown on Children tab) */}
         {activeTab === 'children' && (
           <div className="mt-6 space-y-4">
-            <FulfillmentQueue />
             <FamilyMessageBoard />
           </div>
         )}
