@@ -160,6 +160,14 @@ export function ParentDashboard() {
     } catch (err: unknown) { setMessage(err instanceof Error ? err.message : 'Something went wrong'); }
   };
 
+  const handleCleanOrphaned = async () => {
+    try {
+      const result = await api.cleanOrphanedInstances() as unknown as { count: number };
+      setMessage(`Cleaned ${result.count} orphaned task(s) 🧹`);
+      loadData();
+    } catch (err: unknown) { setMessage(err instanceof Error ? err.message : 'Error'); }
+  };
+
   const openEditTemplate = (tpl: TaskTemplate) => {
     setEditingTemplate(tpl);
     setTaskName(tpl.name);
@@ -305,6 +313,9 @@ export function ParentDashboard() {
                 <NLTaskCreator children={children} onCreated={() => { loadData(); }} />
                 <button onClick={() => setShowAddTask(true)} className="btn-primary">
                   + Create Task
+                </button>
+                <button onClick={() => handleCleanOrphaned()} className="btn-quest bg-gray-200 text-sm" title="Remove tasks from deleted templates">
+                  🧹 Clean
                 </button>
               </div>
             </div>
