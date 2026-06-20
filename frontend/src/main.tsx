@@ -4,6 +4,34 @@ import App from './App';
 import './index.css';
 import './lib/i18n'; // Initialize i18next
 import { setLanguageDirection } from './lib/i18n';
+import { ErrorBoundary } from './components/shared/ErrorBoundary';
+
+const CHUNK_RELOAD_KEY = 'questkids-chunk-reload-attempted';
+
+function isChunkLoadError(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error);
+  return /Failed to fetch dynamically imported module|Importing a module script failed|Loading chunk|dynamically imported module/i.test(message);
+}
+
+async function clearAppCaches() {
+  if ('caches' in window) {
+    const names = await caches.keys();
+    await Promise.all(names.filter(name => name.startsWith('questkids-')).map(name => caches.delete(name)));
+  }
+}
+
+function recoverFromStaleChunk(error: unknown) {
+  if (!isChunkLoadError(error)) return;
+  const lastAttempt = Number(sessionStorage.getItem(CHUNK_RELOAD_KEY) || 0);
+  if (Date.now() - lastAttempt < 60_000) return;
+  sessionStorage.setItem(CHUNK_RELOAD_KEY, String(Date.now()));
+  clearAppCaches()
+    .catch(() => {})
+    .finally(() => window.location.reload());
+}
+
+window.addEventListener('error', event => recoverFromStaleChunk(event.error || event.message));
+window.addEventListener('unhandledrejection', event => recoverFromStaleChunk(event.reason));
 
 // eslint-disable-next-line react-refresh/only-export-components
 function Root() {
@@ -23,7 +51,9 @@ function Root() {
     <React.StrictMode>
       {/* Phase 9: Skip to content link for accessibility */}
       <a href="#main-content" className="skip-to-content">Skip to content</a>
-      <App />
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
     </React.StrictMode>
   );
 }

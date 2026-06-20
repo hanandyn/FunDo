@@ -30,6 +30,10 @@ export class ErrorBoundary extends Component<Props, State> {
     this.setState({ hasError: false, error: null });
   };
 
+  handleReload = () => {
+    window.location.reload();
+  };
+
   render() {
     if (this.state.hasError) {
       if (this.props.fallback) return this.props.fallback;
@@ -47,6 +51,13 @@ export class ErrorBoundary extends Component<Props, State> {
               aria-label="Retry loading"
             >
               Try Again
+            </button>
+            <button
+              onClick={this.handleReload}
+              className="mt-4 ml-3 px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors focus:ring-2 focus:ring-gray-300 focus:outline-none"
+              aria-label="Reload page"
+            >
+              Reload Page
             </button>
           </div>
         </div>

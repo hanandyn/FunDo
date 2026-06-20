@@ -1,10 +1,8 @@
-// QuestKids Service Worker — Phase 7 PWA
-const CACHE_NAME = 'questkids-v0.7.0';
+// QuestKids Service Worker
+const CACHE_NAME = 'questkids-v1.0.1';
 const STATIC_ASSETS = [
-  '/',
-  '/index.html',
   '/manifest.json',
-  '/favicon.ico',
+  '/favicon.svg',
 ];
 
 // Install: cache static assets
@@ -53,7 +51,18 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Static assets: cache-first
+  // Navigation requests: network-first so users do not get an old app shell
+  // pointing at deleted hashed JS chunks after a deploy.
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => response)
+        .catch(() => caches.match('/index.html').then((cached) => cached || caches.match('/')))
+    );
+    return;
+  }
+
+  // Static assets: cache-first for immutable build assets and app images.
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
