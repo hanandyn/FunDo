@@ -1,0 +1,1 @@
+export { PhotoApprovalQueue as default } from '../components/parent/PhotoApprovalQueue';

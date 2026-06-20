@@ -18,6 +18,7 @@ import type { ThemePreferences } from './lib/types';
 const OnboardingWizard = lazy(() => import('./components/onboarding/OnboardingWizard'));
 const KidQuestBoard = lazy(() => import('./lazy/KidQuestBoard'));
 const TeenDashboard = lazy(() => import('./lazy/TeenDashboard'));
+const YoungAdultDashboard = lazy(() => import('./lazy/YoungAdultDashboard'));
 const LittleExplorerDashboard = lazy(() => import('./lazy/LittleExplorerDashboard'));
 const ParentDashboard = lazy(() => import('./lazy/ParentDashboard'));
 const MarketplacePage = lazy(() => import('./lazy/TemplateMarketplace'));
@@ -38,6 +39,7 @@ const IntegrationsSettingsPage = lazy(() => import('./lazy/IntegrationsSettings'
 
 // Phase 10
 const PrivacySettingsPage = lazy(() => import('./lazy/PrivacySettings'));
+const PhotoApprovalQueuePage = lazy(() => import('./lazy/PhotoApprovalQueue'));
 
 // Phase 9: Shared components still eagerly loaded (needed everywhere)
 const LoadingFallback = () => (
@@ -159,13 +161,24 @@ function AppContent() {
     );
   }
 
-  // Tier 5 teens (ages 13+) get their own dashboard
-  if (user.role === 'child' && (user.age_tier || 0) >= 5) {
+  // Tier 4 teens (ages 13-15) get the teen dashboard
+  if (user.role === 'child' && (user.age_tier || 0) === 4) {
     return (
       <Suspense fallback={<LoadingFallback />}>
         <ShabbatBanner />
         <RitualBanner />
         <TeenDashboard />
+      </Suspense>
+    );
+  }
+
+  // Tier 5 young adults (ages 16-18) get a minimalist, mature dashboard
+  if (user.role === 'child' && (user.age_tier || 0) >= 5) {
+    return (
+      <Suspense fallback={<LoadingFallback />}>
+        <ShabbatBanner />
+        <RitualBanner />
+        <YoungAdultDashboard />
       </Suspense>
     );
   }
@@ -193,6 +206,7 @@ function AppContent() {
           <Route path="/ritual-settings" element={<RitualSettingsPage />} />
           <Route path="/integrations" element={<IntegrationsSettingsPage />} />
           <Route path="/privacy" element={<PrivacySettingsPage />} />
+          <Route path="/approvals" element={<PhotoApprovalQueuePage />} />
           <Route path="*" element={<ParentDashboard />} />
         </Routes>
       </Suspense>

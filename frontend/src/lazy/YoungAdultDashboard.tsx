@@ -1,0 +1,1 @@
+export { YoungAdultDashboard as default } from '../components/kid/YoungAdultDashboard';

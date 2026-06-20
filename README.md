@@ -1,7 +1,7 @@
 # 🏰 QuestKids
 
 > Gamified chore & task platform for kids ages 3–18  
-> **v0.9.0** — Polish & Quality
+> **v1.0.0** — Production Release
 
 ## Overview
 
@@ -51,11 +51,23 @@ QuestKids turns everyday chores and tasks into an adventure game. Kids earn poin
 - 🔊 Audio-guided task prompts
 - 🧸 Simplified touch-friendly UI with big buttons
 
-### Tier 4: Teen Champions (Ages 13+)
+### Tier 4: Teen Champions (Ages 13-15)
 - 💰 Allowance tracker — link stars to real money
 - 📊 Personal analytics & trends
 - 🎯 Savings goal tracking
 - 📈 Advanced view with charts
+
+### Tier 5: Young Adults (Ages 16-18)
+- 🎯 Minimalist, professional dashboard — not childish
+- 📊 Habit tracker with weekly consistency grid
+- 💰 Financial literacy — allowance, savings goals, exchange rates
+- 🏆 Goal & milestone tracking — streaks, level progress
+- 📅 Calendar sync (iCal feed) for task schedules
+- 📈 Personal insights & weekly analytics
+
+### Parent Tools
+- 📸 Photo approval queue — review & approve/reject task photos
+- 🔧 Smart task suggestions with AI-powered insights
 
 ### Social & Engagement
 - 👏 Cheer system — siblings encourage each other
@@ -296,6 +308,7 @@ Streak: 1.0→1.2 at 3d, 1.5 at 7d, 2.5 at 30d, 3.0 at 60d
 | 7 | v0.7.0 | Adaptive UI — Tier 1 pets, avatar shop, allowance |
 | 8 | v0.8.0 | Engagement — sounds, rituals, messages, suggestions, analytics |
 | 9 | v0.9.0 | Polish & Quality — performance, onboarding, search, testing |
+| 10 | v1.0.0 | Production — Tier 5 Young Adult dashboard, photo approval queue, clear TTS voice prompts, v1.0 release |
 
 ## License
 
