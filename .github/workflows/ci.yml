@@ -63,7 +63,12 @@ jobs:
         run: npx eslint src/ --max-warnings 0
 
       - name: Run Vitest
-        run: npx vitest run --reporter=verbose
+        run: |
+          if find src -type f \( -name '*.test.*' -o -name '*.spec.*' \) | grep -q .; then
+            npx vitest run src --reporter=verbose
+          else
+            echo "No frontend unit tests found; skipping Vitest."
+          fi
 
   build-check:
     name: Build Check
