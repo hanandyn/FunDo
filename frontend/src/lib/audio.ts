@@ -67,10 +67,53 @@ function playFile(path: string): void {
   }
 }
 
+/**
+ * Voice prompt text map — what each voice prompt says in English.
+ * For English, we use browser SpeechSynthesis (proper English voice).
+ * For Hebrew, we use pre-recorded MP3 files (phonikud-tts maia voice).
+ */
+const VOICE_TEXTS: Record<string, string> = {
+  'task-complete': 'Task complete! Great job!',
+  'level-up': 'Level up! You are amazing!',
+  'chest-open': 'Mystery chest opened!',
+  'timer-warning': 'Time is almost up! Finish now!',
+  'streak-milestone': 'Streak milestone reached! Keep it going!',
+  'all-done': 'All done! You finished everything today!',
+  'recap-intro': 'Here is your weekly recap!',
+  'great-job': 'Great job! You are a superstar!',
+};
+
 function playVoice(name: string): void {
   if (_muted || !_voiceEnabled) return;
   const lang = getLang();
-  playFile(`/sounds/voice/${lang}/${name}.mp3`);
+  if (lang === 'he') {
+    // Hebrew: use pre-recorded MP3 files (phonikud-tts maia voice)
+    playFile(`/sounds/voice/he/${name}.mp3`);
+  } else {
+    // English (and other languages): use browser SpeechSynthesis for proper English speech
+    const text = VOICE_TEXTS[name];
+    if (text && typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      try {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-US';
+        utterance.rate = 0.9;
+        utterance.pitch = 1.1;
+        utterance.volume = 0.8;
+        // Pick an English voice
+        const voices = window.speechSynthesis.getVoices();
+        const enVoice = voices.find(v => v.lang.startsWith('en') && v.localService);
+        if (enVoice) utterance.voice = enVoice;
+        window.speechSynthesis.speak(utterance);
+      } catch {
+        // Fallback to file if SpeechSynthesis fails
+        playFile(`/sounds/voice/en/${name}.mp3`);
+      }
+    } else {
+      // Fallback to pre-recorded file
+      playFile(`/sounds/voice/en/${name}.mp3`);
+    }
+  }
 }
 
 // ── Sound Effects (file-based with programmatic fallback) ──

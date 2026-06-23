@@ -271,7 +271,7 @@ export function ParentDashboard() {
       <header className="bg-white shadow-sm sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           <h1 className="text-2xl font-bold flex items-center gap-2">
-            🏰 FunDo <span className="text-sm text-gray-400">| Parent</span> <span className="text-xs text-gray-300 ml-1">v1.0.0</span>
+            🏰 FunDo <span className="text-sm text-gray-400">| Parent</span> <span className="text-xs text-gray-300 ml-1">v1.0.1</span>
           </h1>
           <div className="flex items-center gap-4">
             <NotificationBell />

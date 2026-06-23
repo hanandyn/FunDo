@@ -1,7 +1,7 @@
 # 🏰 FunDo
 
 > Gamified chore & task platform for kids ages 3–18  
-> **v1.0.0** — Production Release
+> **v1.0.1** - Production Release
 
 ## Overview
 

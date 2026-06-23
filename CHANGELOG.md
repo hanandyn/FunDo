@@ -2,6 +2,12 @@
 
 All notable changes to FunDo will be documented in this file.
 
+## [v1.0.1] - 2026-06-23 - Audio Stabilization
+
+### Fixed
+- English voice prompts now use browser SpeechSynthesis so they speak with a proper English voice.
+- Hebrew voice prompts continue to use the existing prerecorded phonikud-tts clips.
+
 ## [v0.9.0] — 2026-06-19 — Polish & Quality
 
 ### 🚀 Performance
