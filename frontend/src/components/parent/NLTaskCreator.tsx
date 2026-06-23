@@ -75,7 +75,7 @@ export function NLTaskCreator({ children, onCreated }: { children: User[]; onCre
     <>
       <button
         onClick={() => setShow(!show)}
-        className="text-sm px-3 py-1.5 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors focus-ring"
+        className="min-h-11 rounded-xl bg-purple-100 px-3 py-2 text-sm font-bold text-purple-700 transition-colors hover:bg-purple-200 focus-ring sm:px-4"
       >
         ✨ {t('parent.nlCreate', 'Describe a Task')}
       </button>

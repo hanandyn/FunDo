@@ -1,3 +1,5 @@
+import { API_BASE } from './apiBase';
+
 const DB_NAME = 'fundo-offline';
 const DB_VERSION = 1;
 const STORE = 'requests';
@@ -81,7 +83,7 @@ async function deleteOfflineRequest(id: number) {
   db.close();
 }
 
-export async function flushOfflineQueue(apiBase = '/api/v1') {
+export async function flushOfflineQueue(apiBase = API_BASE) {
   if (!navigator.onLine) return { synced: 0, remaining: await getOfflineQueueCount() };
 
   const queued = await getOfflineQueue();

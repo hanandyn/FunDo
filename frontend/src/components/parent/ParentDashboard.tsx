@@ -269,14 +269,16 @@ export function ParentDashboard() {
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-blue-50">
       {/* Header */}
       <header className="bg-white shadow-sm sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            🏰 FunDo <span className="text-sm text-gray-400">| Parent</span> <span className="text-xs text-gray-300 ml-1">v1.0.1</span>
+        <div className="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+          <h1 className="min-w-0 text-xl sm:text-2xl font-bold flex items-center gap-2">
+            <span className="truncate">🏰 FunDo</span>
+            <span className="text-sm text-gray-400">| Parent</span>
+            <span className="text-xs text-gray-300">v1.0.1</span>
           </h1>
-          <div className="flex items-center gap-4">
+          <div className="flex min-w-0 flex-1 sm:flex-none items-center justify-end gap-3">
             <NotificationBell />
-            <span className="text-sm text-gray-500">👋 {user?.display_name}</span>
-            <button onClick={logout} className="text-sm text-red-500 hover:underline">{'Logout'}</button>
+            <span className="min-w-0 truncate text-sm text-gray-500">👋 {user?.display_name}</span>
+            <button onClick={logout} className="shrink-0 text-sm text-red-500 hover:underline">{'Logout'}</button>
           </div>
         </div>
       </header>
@@ -294,12 +296,13 @@ export function ParentDashboard() {
         )}
 
         {/* Tab Navigation */}
-        <div className="flex gap-2 mb-6">
+        <div className="-mx-4 mb-6 overflow-x-auto px-4 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="flex w-max gap-2">
           {(['children', 'tasks', 'manage', 'rewards', 'goals', 'recap', 'insights', 'analytics', 'suggestions', 'rituals', 'marketplace', 'organizations', 'calendar', 'teacher', 'metrics', 'approvals'] as const).map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-6 py-3 rounded-xl font-bold text-lg transition-all ${
+              className={`shrink-0 px-4 py-2.5 sm:px-6 sm:py-3 rounded-xl font-bold text-sm sm:text-lg transition-all ${
                 activeTab === tab
                   ? 'bg-quest-blue text-white shadow-lg'
                   : 'bg-white text-gray-600 hover:bg-gray-50'
@@ -308,6 +311,7 @@ export function ParentDashboard() {
               {tab === 'children' ? '👶 Children' : tab === 'manage' ? '⚖️ Manage' : tab === 'tasks' ? '📋 Tasks' : tab === 'rewards' ? '🎁 Rewards' : tab === 'goals' ? '🎯 Goals' : tab === 'recap' ? '📊 Recap' : tab === 'insights' ? '💡 Insights' : tab === 'analytics' ? '📊 Analytics' : tab === 'suggestions' ? '🧠 Tips' : tab === 'rituals' ? '🌅 Rituals' : tab === 'marketplace' ? '📋 Marketplace' : tab === 'organizations' ? '🏫 Orgs' : tab === 'calendar' ? '📅 Calendar' : tab === 'teacher' ? '👩‍🏫 Teacher' : tab === 'approvals' ? '📸 Approvals' : '📈 Metrics'}
             </button>
           ))}
+          </div>
         </div>
 
         {/* Children Tab */}
@@ -481,14 +485,17 @@ export function ParentDashboard() {
         {/* Tasks Tab */}
         {activeTab === 'tasks' && (
           <div>
-            <div className="flex justify-between items-center mb-4 gap-2">
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <h2 className="text-xl font-bold">Task Templates ({templates.length})</h2>
-              <div className="flex gap-2">
+              <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
                 <NLTaskCreator children={children} onCreated={() => { loadData(); }} />
-                <button onClick={() => setShowAddTask(true)} className="btn-primary">
+                <button
+                  onClick={() => setShowAddTask(true)}
+                  className="min-h-11 rounded-xl bg-quest-blue px-3 py-2 text-sm font-bold text-white transition-colors hover:bg-blue-600 sm:px-4"
+                >
                   + Create Task
                 </button>
-                <button onClick={() => handleCleanOrphaned()} className="btn-quest bg-gray-200 text-sm" title="Remove tasks from deleted templates">
+                <button onClick={() => handleCleanOrphaned()} className="col-span-2 min-h-11 rounded-xl bg-gray-200 px-3 py-2 text-sm font-bold text-gray-700 transition-colors hover:bg-gray-300 sm:col-span-1 sm:px-4" title="Remove tasks from deleted templates">
                   🧹 Clean
                 </button>
               </div>

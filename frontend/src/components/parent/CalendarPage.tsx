@@ -20,7 +20,7 @@ export function CalendarPage() {
   const getFeedUrl = (childId: number) => {
     const token = localStorage.getItem('token');
     // iCal feeds use a different auth — we embed the token as a query param for simplicity
-    return `${window.location.origin}/api/v1/calendar/${childId}/feed.ics?token=${token}`;
+    return `${api.getCalendarFeedUrl(childId)}?token=${token}`;
   };
 
   const copyUrl = (childId: number) => {

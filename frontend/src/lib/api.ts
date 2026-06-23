@@ -1,12 +1,22 @@
 import { enqueueOfflineRequest, flushOfflineQueue } from './offlineQueue';
-
-const API_BASE = '/api/v1';
+import { apiUrl } from './apiBase';
 
 type JSONData = Record<string, unknown>;
 type OfflineQueuedResponse = JSONData & {
   offline_queued: true;
   message: string;
 };
+
+async function parseJsonResponse<T = JSONData>(res: Response): Promise<T> {
+  const contentType = res.headers.get('content-type') || '';
+  if (!contentType.includes('application/json')) {
+    const text = await res.text().catch(() => '');
+    const hint = text.trim().startsWith('<') ? ' Received HTML instead.' : '';
+    throw new Error(`API returned ${contentType || 'an unknown content type'}.${hint}`);
+  }
+
+  return res.json();
+}
 
 function canQueueOffline(path: string, options: RequestInit) {
   const method = (options.method || 'GET').toUpperCase();
@@ -50,7 +60,7 @@ async function apiFetch<T = JSONData>(path: string, options: RequestInit = {}): 
 
   let res: Response;
   try {
-    res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+    res = await fetch(apiUrl(path), { ...options, headers });
   } catch (error) {
     if (canQueueOffline(path, options)) {
       return queueOfflineRequest<T>(path, options);
@@ -59,14 +69,14 @@ async function apiFetch<T = JSONData>(path: string, options: RequestInit = {}): 
   }
   
   if (!res.ok) {
-    const error = await res.json().catch(() => ({ detail: 'Request failed' }));
+    const error = await parseJsonResponse<{ detail?: string }>(res).catch(() => ({ detail: 'Request failed' }));
     if (res.status === 503 && canQueueOffline(path, options)) {
       return queueOfflineRequest<T>(path, options);
     }
     throw new Error(error.detail || `HTTP ${res.status}`);
   }
   
-  return res.json();
+  return parseJsonResponse<T>(res);
 }
 
 export const api = {
@@ -92,7 +102,7 @@ export const api = {
     const token = localStorage.getItem('token');
     const headers: Record<string, string> = {};
     if (token) headers['Authorization'] = `Bearer ${token}`;
-    return fetch(`/api/v1/tasks/templates/${templateId}/image`, {
+    return fetch(apiUrl(`/tasks/templates/${templateId}/image`), {
       method: 'POST',
       headers,
       body: formData,
@@ -243,7 +253,7 @@ export const api = {
   completeHomework: (id: number, completed = true) => apiFetch(`/school/assignments/${id}/complete`, { method: 'POST', body: JSON.stringify({ completed }) }),
 
   // Phase 5: Calendar
-  getCalendarFeedUrl: (childId: number) => `/api/v1/calendar/${childId}/feed.ics`,
+  getCalendarFeedUrl: (childId: number) => apiUrl(`/calendar/${childId}/feed.ics`),
 
   // Phase 5: Seasonal Events
   getActiveEvents: () => apiFetch('/events/active'),
@@ -261,7 +271,7 @@ export const api = {
     const token = localStorage.getItem('token');
     const headers: Record<string, string> = {};
     if (token) headers['Authorization'] = `Bearer ${token}`;
-    return fetch(`/api/v1/tasks/instances/${instanceId}/upload-photo`, {
+    return fetch(apiUrl(`/tasks/instances/${instanceId}/upload-photo`), {
       method: 'POST',
       headers,
       body: formData,
@@ -270,7 +280,7 @@ export const api = {
       return res.json();
     }) as Promise<{ photo_url: string; message: string }>;
   },
-  getTaskPhotoUrl: (instanceId: number) => `/api/v1/tasks/instances/${instanceId}/photo`,
+  getTaskPhotoUrl: (instanceId: number) => apiUrl(`/tasks/instances/${instanceId}/photo`),
   getPendingApprovals: () => apiFetch('/tasks/pending-approvals'),
 
   // Phase 6: Email Verification
@@ -326,8 +336,8 @@ export const api = {
 
   // Phase 8: Analytics
   getChildTrends: (childId: number, days = 30) => apiFetch(`/analytics/child/${childId}/trends?days=${days}`),
-  getChildExportPdfUrl: (childId: number) => `/api/v1/analytics/child/${childId}/export/pdf`,
-  getFamilyExportCsvUrl: () => `/api/v1/analytics/family/export/csv`,
+  getChildExportPdfUrl: (childId: number) => apiUrl(`/analytics/child/${childId}/export/pdf`),
+  getFamilyExportCsvUrl: () => apiUrl('/analytics/family/export/csv'),
 
   // Phase 9: Onboarding Wizard
   onboardingTemplates: (ageTiers?: string) => apiFetch(`/onboarding/templates${ageTiers ? `?age_tiers=${ageTiers}` : ''}`),

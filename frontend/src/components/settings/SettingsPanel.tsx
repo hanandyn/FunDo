@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../../lib/api';
 import type { ShabbatStatus, ShabbatSettings, ThemePreferences } from '../../lib/types';
 import { SUPPORTED_LANGUAGES, setLanguageDirection } from '../../lib/i18n';
+import { getUserServerUrl, setUserServerUrl, DEFAULT_PRODUCTION_ORIGIN } from '../../lib/apiBase';
 
 interface SettingsPanelProps {
   isParent?: boolean;
@@ -19,6 +20,7 @@ export function SettingsPanel({ isParent = false, onClose }: SettingsPanelProps)
   const [colorblindTheme, setColorblindTheme] = useState('');
   const [highContrast, setHighContrast] = useState(false);
   const [language, setLanguage] = useState(i18n.language?.startsWith('he') ? 'he' : 'en');
+  const [serverUrl, setServerUrl] = useState(() => getUserServerUrl() || '');
   const [message, setMessage] = useState('');
 
   useEffect(() => {
@@ -75,6 +77,15 @@ export function SettingsPanel({ isParent = false, onClose }: SettingsPanelProps)
       });
       setShabbatSettings({ ...shabbatSettings, shabbat_mode: mode });
     } catch { /* ignore */ }
+  };
+
+  const handleServerSave = () => {
+    const trimmed = serverUrl.trim().replace(/\/+$/, '');
+    setUserServerUrl(trimmed);
+    setMessage(trimmed ? `Server set to ${trimmed}. Reloading...` : 'Server reset to default. Reloading...');
+    setTimeout(() => {
+      window.location.reload();
+    }, 1200);
   };
 
   return (
@@ -188,6 +199,35 @@ export function SettingsPanel({ isParent = false, onClose }: SettingsPanelProps)
           <div className="text-sm text-purple-700 text-center mt-2">
             {t('settings.shabbatEndsIn')}: {Math.floor(shabbatStatus.ends_in_minutes / 60)}h {shabbatStatus.ends_in_minutes % 60}m
           </div>
+        )}
+      </div>
+
+      {/* Server Connection */}
+      <div className="mb-6 p-4 bg-blue-50 rounded-xl">
+        <h3 className="font-bold text-sm mb-1 text-blue-800 uppercase">🖥️ Server</h3>
+        <p className="text-xs text-blue-600 mb-3">Enter your FunDo server address (URL or IP:port)</p>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={serverUrl}
+            onChange={e => setServerUrl(e.target.value)}
+            placeholder={DEFAULT_PRODUCTION_ORIGIN}
+            className="flex-1 px-3 py-2 rounded-xl border-2 border-blue-200 text-sm bg-white"
+          />
+          <button
+            onClick={handleServerSave}
+            className="px-4 py-2 rounded-xl bg-quest-blue text-white text-sm font-medium whitespace-nowrap"
+          >
+            Apply
+          </button>
+        </div>
+        {serverUrl && (
+          <button
+            onClick={() => { setServerUrl(''); handleServerSave(); }}
+            className="text-xs text-blue-500 mt-2 underline"
+          >
+            Reset to default
+          </button>
         )}
       </div>
 
