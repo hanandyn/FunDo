@@ -20,7 +20,14 @@ def is_scheduled_today(template: TaskTemplate, target_date: date | None = None) 
     today = target_date or date.today()
     schedule = template.schedule_type
 
-    if schedule == "daily":
+    if schedule == "once":
+        # One-shot tasks only appear on the day they were created
+        created = template.created_at
+        if created:
+            created_date = created.date() if hasattr(created, 'date') else created
+            return today == created_date
+        return today == date.today()  # fallback: only today
+    elif schedule == "daily":
         return True
     elif schedule == "weekdays":
         return today.weekday() < 5  # Mon-Fri
@@ -81,7 +88,8 @@ def is_scheduled_today(template: TaskTemplate, target_date: date | None = None) 
             return today.weekday() in template.schedule_days
         return True
 
-    return schedule == "daily"
+    # Unknown schedule types: treat as once (don't auto-repeat)
+    return False
 
 
 def get_next_occurrences(template: TaskTemplate, from_date: date, days: int = 7) -> list[date]:
@@ -97,6 +105,90 @@ def get_next_occurrences(template: TaskTemplate, from_date: date, days: int = 7)
             if len(occurrences) >= days:
                 break
     return occurrences
+
+
+async def generate_today_instances(
+    db: AsyncSession,
+    family_id: int,
+    children_ids: Sequence[int],
+) -> list[TaskInstance]:
+    """Generate TaskInstance records for today only.
+    
+    Called when a kid loads their dashboard — ensures today's recurring
+    tasks have instances. Does NOT regenerate instances that already exist
+    (completed, in_progress, or pending).
+    
+    Also marks yesterday's pending tasks as "missed" so they don't
+    carry over to the next day.
+    """
+    today = date.today()
+    yesterday = today - timedelta(days=1)
+
+    # Mark yesterday's pending tasks as missed
+    yesterday_start = datetime(yesterday.year, yesterday.month, yesterday.day, tzinfo=timezone.utc)
+    yesterday_end = yesterday_start + timedelta(days=1)
+    stale_result = await db.execute(
+        select(TaskInstance).where(
+            TaskInstance.status == "pending",
+            TaskInstance.date >= yesterday_start,
+            TaskInstance.date < yesterday_end,
+            TaskInstance.child_id.in_(children_ids),
+        )
+    )
+    stale_instances = stale_result.scalars().all()
+    for inst in stale_instances:
+        inst.status = "missed"
+
+    templates_result = await db.execute(
+        select(TaskTemplate).where(
+            TaskTemplate.family_id == family_id,
+            TaskTemplate.is_active == True,
+        )
+    )
+    templates = templates_result.scalars().all()
+
+    instances = []
+    for template in templates:
+        # Skip "once" tasks — they only get an instance on creation day
+        if template.schedule_type == "once":
+            continue
+
+        if not is_scheduled_today(template, today):
+            continue
+
+        # Determine which kids get this template
+        if template.assigned_kids is not None:
+            eligible_kids = [cid for cid in children_ids if cid in template.assigned_kids]
+        else:
+            eligible_kids = list(children_ids)
+
+        for child_id in eligible_kids:
+            # Check if ANY instance already exists for today (any status)
+            existing_result = await db.execute(
+                select(TaskInstance).where(
+                    TaskInstance.template_id == template.id,
+                    TaskInstance.child_id == child_id,
+                    TaskInstance.date >= today.isoformat(),
+                    TaskInstance.date < _add_days(today, 1).isoformat(),
+                )
+            )
+            existing = existing_result.scalars().first()
+            if existing:
+                continue
+
+            instance = TaskInstance(
+                template_id=template.id,
+                child_id=child_id,
+                date=datetime(today.year, today.month, today.day, tzinfo=timezone.utc),
+                status="pending",
+            )
+            db.add(instance)
+            instances.append(instance)
+
+    if instances:
+        await db.commit()
+
+    return instances
 
 
 async def generate_instances_for_week(

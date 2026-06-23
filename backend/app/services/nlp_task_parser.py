@@ -88,6 +88,9 @@ def parse_natural_language_task(text: str, child_name: str | None = None) -> dic
         parsed["schedule_type"] = "weekdays"
         parsed["schedule_days"] = [0, 1, 2, 3, 4]
         confidence += 0.1
+    elif re.search(r"\b(once|one.time|just.today|single.time)\b", text_lower):
+        parsed["schedule_type"] = "once"
+        confidence += 0.1
     elif re.search(r"\bevery\s+day\b|\bdaily\b", text_lower):
         parsed["schedule_type"] = "daily"
         confidence += 0.1

@@ -345,7 +345,11 @@ async def get_task_instances(
     db: AsyncSession = Depends(get_db),
     child_id: int | None = None,
 ):
-    """Get task instances. Parents see all children; child sees their own."""
+    """Get task instances. Parents see all children; child sees their own.
+    
+    For child users, also regenerates today's recurring task instances
+    so daily/weekly/monthly tasks appear automatically each day.
+    """
     if current_user.role == "parent":
         query = select(TaskInstance).options(selectinload(TaskInstance.template)).where(
             TaskInstance.template.has(TaskTemplate.family_id == current_user.family_id)
@@ -353,6 +357,10 @@ async def get_task_instances(
         if child_id:
             query = query.where(TaskInstance.child_id == child_id)
     else:
+        # Regenerate today's recurring instances before loading
+        if current_user.family_id:
+            from ..services.scheduling import generate_today_instances
+            await generate_today_instances(db, current_user.family_id, [current_user.id])
         query = select(TaskInstance).options(selectinload(TaskInstance.template)).where(
             TaskInstance.child_id == current_user.id
         )
@@ -375,6 +383,19 @@ async def start_timer(
         raise HTTPException(status_code=404, detail="Task instance not found")
     if current_user.role == "child" and instance.child_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not your task")
+
+    # Check time window if set
+    template = await db.execute(
+        select(TaskTemplate).where(TaskTemplate.id == instance.template_id)
+    )
+    template_obj = template.scalar_one_or_none()
+    if template_obj and (template_obj.time_window_start or template_obj.time_window_end):
+        now = datetime.now(timezone.utc)
+        current_time = now.strftime("%H:%M")
+        if template_obj.time_window_start and current_time < template_obj.time_window_start:
+            raise HTTPException(status_code=400, detail=f"Task opens at {template_obj.time_window_start}")
+        if template_obj.time_window_end and current_time > template_obj.time_window_end:
+            raise HTTPException(status_code=400, detail=f"Time window closed at {template_obj.time_window_end}")
 
     instance.status = "in_progress"
     instance.timer_started_at = datetime.now(timezone.utc)
@@ -402,6 +423,16 @@ async def complete_task(
     if current_user.role == "child" and instance.child_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not your task")
 
+    # Check time window for non-timed tasks (timed tasks already checked at start)
+    template = instance.template
+    if template and (template.time_window_start or template.time_window_end):
+        now = datetime.now(timezone.utc)
+        current_time = now.strftime("%H:%M")
+        if template.time_window_start and current_time < template.time_window_start:
+            raise HTTPException(status_code=400, detail=f"Task opens at {template.time_window_start}")
+        if template.time_window_end and current_time > template.time_window_end:
+            raise HTTPException(status_code=400, detail=f"Time window closed at {template.time_window_end}")
+
     # Get the child user for stats
     child_result = await db.execute(select(User).where(User.id == instance.child_id))
     child = child_result.scalar_one_or_none()
@@ -426,8 +457,8 @@ async def complete_task(
         base_points=template.base_points or 10,
         asks_count=instance.asks_count or 1,
         max_asks=template.max_asks or 2,
-        bonus_first_ask=template.bonus_first_ask or 10,
-        penalty_per_ask=template.penalty_per_ask or -5,
+        bonus_first_ask=template.bonus_first_ask or 0,
+        penalty_per_ask=template.penalty_per_ask or 0,
         elapsed_seconds=data.elapsed_seconds if template.task_type == "timed" else None,
         timer_duration=template.timer_duration,
         early_finish_bonus_per_min=template.early_finish_bonus_per_min or 2,
@@ -448,10 +479,13 @@ async def complete_task(
     instance.timer_ended_at = datetime.now(timezone.utc)
     instance.points_earned = scoring["total"]
     instance.bonus_points = (
-        scoring["compliance_bonus"] + scoring["speed_bonus"] +
+        max(0, scoring["compliance_bonus"]) + max(0, scoring["speed_bonus"]) +
         scoring["streak_bonus"] + scoring["random_bonus"] + scoring["handicap_bonus"]
     )
-    instance.penalty_points = abs(scoring.get("overstay_penalty", 0)) if scoring.get("overstay_penalty", 0) < 0 else 0
+    instance.penalty_points = (
+        (abs(scoring["compliance_bonus"]) if scoring.get("compliance_bonus", 0) < 0 else 0) +
+        (abs(scoring.get("overstay_penalty", 0)) if scoring.get("overstay_penalty", 0) < 0 else 0)
+    )
 
     # Update child's stats
     gems_earned = 0

@@ -100,6 +100,7 @@ class TestCalculateTaskPoints:
         result = calculate_task_points(
             base_points=50,
             asks_count=1,
+            bonus_first_ask=10,
             elapsed_seconds=360,  # 6 min
             timer_duration=600,   # 10 min
             early_finish_bonus_per_min=2,
@@ -114,6 +115,7 @@ class TestCalculateTaskPoints:
         result = calculate_task_points(
             base_points=50,
             asks_count=1,
+            bonus_first_ask=10,
             elapsed_seconds=720,  # 12 min
             timer_duration=600,   # 10 min
             early_finish_bonus_per_min=2,

@@ -15,11 +15,37 @@ export function CountdownTimer({ instance, onComplete, onCancel }: Props) {
   const [elapsed, setElapsed] = useState(0);
   const [overtime, setOvertime] = useState(0); // seconds past zero
   const [phase, setPhase] = useState<'counting' | 'overtime' | 'done'>('counting');
+  const [keepAwake, setKeepAwake] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const wakeLockRef = useRef<{ release: () => Promise<void> } | null>(null);
 
   const progress = Math.max(0, (remaining / duration) * 100);
   const circumference = 2 * Math.PI * 120; // r=120
   const strokeDashoffset = circumference - (progress / 100) * circumference;
+
+  // Wake Lock API — keep screen on while timer is visible
+  const requestWakeLock = useCallback(async () => {
+    try {
+      if ('wakeLock' in navigator) {
+        wakeLockRef.current = await (navigator as Navigator & { wakeLock: { request: (type: string) => Promise<{ release: () => Promise<void> }> } }).wakeLock.request('screen');
+        setKeepAwake(true);
+      }
+    } catch {
+      // Wake Lock not supported or denied — silently ignore
+    }
+  }, []);
+
+  const releaseWakeLock = useCallback(async () => {
+    try {
+      if (wakeLockRef.current) {
+        await wakeLockRef.current.release();
+        wakeLockRef.current = null;
+        setKeepAwake(false);
+      }
+    } catch {
+      // Ignore release errors
+    }
+  }, []);
 
   // Auto-start the timer immediately when the overlay appears
   useEffect(() => {
@@ -43,14 +69,23 @@ export function CountdownTimer({ instance, onComplete, onCancel }: Props) {
     };
   }, [duration]);
 
+  // Release wake lock on unmount
+  useEffect(() => {
+    return () => {
+      releaseWakeLock();
+    };
+  }, [releaseWakeLock]);
+
   const handleComplete = useCallback(() => {
     if (intervalRef.current) clearInterval(intervalRef.current);
+    releaseWakeLock();
     setPhase('done');
     onComplete(elapsed);
-  }, [elapsed, onComplete]);
+  }, [elapsed, onComplete, releaseWakeLock]);
 
   const handleCancel = () => {
     if (intervalRef.current) clearInterval(intervalRef.current);
+    releaseWakeLock();
     onCancel();
   };
 
@@ -172,6 +207,25 @@ export function CountdownTimer({ instance, onComplete, onCancel }: Props) {
             </>
           )}
         </div>
+
+        {/* Keep Screen Awake checkbox */}
+        {'wakeLock' in navigator && (
+          <label className="flex items-center justify-center gap-2 mb-4 text-sm text-gray-600 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={keepAwake}
+              onChange={e => {
+                if (e.target.checked) {
+                  requestWakeLock();
+                } else {
+                  releaseWakeLock();
+                }
+              }}
+              className="w-4 h-4 rounded accent-quest-blue"
+            />
+            📱 Keep screen on while timer runs
+          </label>
+        )}
 
         {/* Controls */}
         <div className="flex gap-3 justify-center">

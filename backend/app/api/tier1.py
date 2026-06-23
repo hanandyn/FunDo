@@ -49,6 +49,11 @@ async def get_tier1_tasks(
     from datetime import datetime, timezone
     today = datetime.now(timezone.utc)
 
+    # Regenerate today's recurring instances
+    if current_user.family_id:
+        from ..services.scheduling import generate_today_instances
+        await generate_today_instances(db, current_user.family_id, [current_user.id])
+
     # Get today's instances
     result = await db.execute(
         select(TaskInstance)

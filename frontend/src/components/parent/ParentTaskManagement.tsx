@@ -168,6 +168,12 @@ export function ParentTaskManagement({ children }: { children: User[] }) {
                       <h4 className="font-bold truncate">{inst.template?.name || 'Task'}</h4>
                       <p className="text-xs text-gray-500">
                         {child?.display_name || `Child #${inst.child_id}`} • ⭐ {inst.points_earned} pts
+                        {inst.template?.task_type === 'timed' && inst.timer_started_at && (
+                          <span className="ml-2">
+                            ⏱ {new Date(inst.timer_started_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}
+                            {inst.timer_ended_at && ` → ${new Date(inst.timer_ended_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}`}
+                          </span>
+                        )}
                       </p>
                     </div>
                   </div>

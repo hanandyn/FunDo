@@ -22,5 +22,5 @@ from .powerups import (
     purchase_powerup, apply_powerup_effect, get_applied_multipliers,
 )
 from .scheduling import (
-    get_next_occurrences, generate_instances_for_week, is_scheduled_today,
+    get_next_occurrences, generate_instances_for_week, generate_today_instances, is_scheduled_today,
 )

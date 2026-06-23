@@ -217,7 +217,27 @@ export function KidQuestBoard() {
     loadData();
   };
 
-  const pendingTasks = instances.filter(i => i.status === 'pending');
+  const todayStr = new Date().toISOString().split('T')[0];
+  const now = new Date();
+  const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+  const isWithinTimeWindow = (inst: TaskInstance): boolean => {
+    const tpl = inst.template;
+    if (!tpl?.time_window_start && !tpl?.time_window_end) return true;
+    if (tpl.time_window_start && currentTime < tpl.time_window_start) return false;
+    if (tpl.time_window_end && currentTime > tpl.time_window_end) return false;
+    return true;
+  };
+
+  const getTimeWindowStatus = (inst: TaskInstance): 'upcoming' | 'active' | 'expired' | 'none' => {
+    const tpl = inst.template;
+    if (!tpl?.time_window_start && !tpl?.time_window_end) return 'none';
+    if (tpl.time_window_start && currentTime < tpl.time_window_start) return 'upcoming';
+    if (tpl.time_window_end && currentTime > tpl.time_window_end) return 'expired';
+    return 'active';
+  };
+
+  const pendingTasks = instances.filter(i => i.status === 'pending' && (!i.date || i.date.startsWith(todayStr)));
   const inProgressTasks = instances.filter(i => i.status === 'in_progress');
   const completedTasks = instances.filter(i => i.status === 'completed');
 
@@ -475,12 +495,15 @@ export function KidQuestBoard() {
                 <p className="text-gray-400">Enjoy your free time, adventurer!</p>
               </motion.div>
             )}
-            {pendingTasks.map(inst => (
+            {pendingTasks.map(inst => {
+              const windowStatus = getTimeWindowStatus(inst);
+              const canAct = isWithinTimeWindow(inst);
+              return (
               <motion.div
                 key={inst.id}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="card-kid bg-white hover:shadow-xl transition-shadow"
+                className={`card-kid bg-white hover:shadow-xl transition-shadow ${!canAct ? 'opacity-60' : ''}`}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
@@ -497,6 +520,15 @@ export function KidQuestBoard() {
                             <span className="text-green-600">+{inst.template?.bonus_first_ask} on 1st ask</span>
                           )}
                         </div>
+                        {windowStatus === 'upcoming' && (
+                          <div className="text-xs text-quest-blue mt-1">⏰ Opens at {inst.template?.time_window_start}</div>
+                        )}
+                        {windowStatus === 'expired' && (
+                          <div className="text-xs text-red-500 mt-1">⏰ Window closed at {inst.template?.time_window_end}</div>
+                        )}
+                        {windowStatus === 'active' && (
+                          <div className="text-xs text-green-600 mt-1">⏰ Until {inst.template?.time_window_end}</div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -504,14 +536,16 @@ export function KidQuestBoard() {
                     {inst.template?.task_type === 'timed' ? (
                       <button
                         onClick={() => handleStartTimer(inst)}
-                        className="btn-primary text-base"
+                        disabled={!canAct}
+                        className={`text-base ${canAct ? 'btn-primary' : 'btn-quest bg-gray-200 text-gray-400 cursor-not-allowed'}`}
                       >
                         ▶ Start
                       </button>
                     ) : (
                       <button
                         onClick={() => handleCompleteOneShot(inst)}
-                        className="btn-success text-base"
+                        disabled={!canAct}
+                        className={`text-base ${canAct ? 'btn-success' : 'btn-quest bg-gray-200 text-gray-400 cursor-not-allowed'}`}
                       >
                         ✅ Done
                       </button>
@@ -519,7 +553,8 @@ export function KidQuestBoard() {
                   </div>
                 </div>
               </motion.div>
-            ))}
+              );
+            })}
 
             {/* Completed Today */}
             {completedTasks.length > 0 && (

@@ -26,8 +26,8 @@ class TaskTemplate(Base):
     
     # Compliance settings
     max_asks = Column(Integer, default=2)
-    bonus_first_ask = Column(Integer, default=10)
-    penalty_per_ask = Column(Integer, default=-5)
+    bonus_first_ask = Column(Integer, default=0)
+    penalty_per_ask = Column(Integer, default=0)
     
     # Scoring modifiers
     early_finish_bonus_per_min = Column(Integer, default=2)

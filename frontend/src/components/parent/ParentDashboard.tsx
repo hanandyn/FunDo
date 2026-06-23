@@ -66,9 +66,11 @@ export function ParentDashboard() {
   const [basePoints, setBasePoints] = useState(10);
   const [timerDuration, setTimerDuration] = useState(600);
   const [maxAsks, setMaxAsks] = useState(2);
-  const firstAskBonus = 10;
-  const penaltyPerAsk = 5;
+  const firstAskBonus = 0;
+  const penaltyPerAsk = 0;
   const [scheduleType, setScheduleType] = useState('daily');
+  const [timeWindowStart, setTimeWindowStart] = useState('');
+  const [timeWindowEnd, setTimeWindowEnd] = useState('');
   const [taskAssignKids, setTaskAssignKids] = useState<number[]>([]);
   const [taskIcon, setTaskIcon] = useState('');
   const [taskImageUrl, setTaskImageUrl] = useState('');
@@ -141,6 +143,8 @@ export function ParentDashboard() {
         penalty_per_ask: -Math.abs(penaltyPerAsk),
         overstay_penalty_per_min: Math.abs(5),
         schedule_type: scheduleType,
+        time_window_start: timeWindowStart || undefined,
+        time_window_end: timeWindowEnd || undefined,
         assigned_child_ids: taskAssignKids.length > 0 ? taskAssignKids : null,
         icon: taskIcon || undefined,
         image_url: taskImageUrl || undefined,
@@ -188,6 +192,8 @@ export function ParentDashboard() {
         timer_duration: taskType === 'timed' ? timerDuration : null,
         max_asks: maxAsks,
         schedule_type: scheduleType,
+        time_window_start: timeWindowStart || undefined,
+        time_window_end: timeWindowEnd || undefined,
         assigned_kids: taskAssignKids.length > 0 ? taskAssignKids : null,
         icon: taskIcon || undefined,
         image_url: taskImageUrl || undefined,
@@ -224,6 +230,8 @@ export function ParentDashboard() {
     setTimerDuration(tpl.timer_duration || 600);
     setMaxAsks(tpl.max_asks);
     setScheduleType(tpl.schedule_type);
+    setTimeWindowStart(tpl.time_window_start || '');
+    setTimeWindowEnd(tpl.time_window_end || '');
     setTaskIcon(tpl.icon || '');
     setTaskImageUrl(tpl.image_url || '');
     handleTaskImageFile(null);
@@ -579,9 +587,11 @@ export function ParentDashboard() {
                         <option value="bonus">Bonus</option>
                       </select>
                       <select value={scheduleType} onChange={e => setScheduleType(e.target.value)} className="px-4 py-3 rounded-xl border-2 border-gray-200">
+                        <option value="once">Once</option>
                         <option value="daily">Daily</option>
                         <option value="weekly">Weekly</option>
                         <option value="weekdays">Weekdays</option>
+                        <option value="monthly">Monthly</option>
                       </select>
                     </div>
                     <div className="grid grid-cols-3 gap-3">
@@ -596,6 +606,17 @@ export function ParentDashboard() {
                       <div>
                         <label className="text-xs text-gray-500">Max Asks</label>
                         <input type="number" value={maxAsks} onChange={e => setMaxAsks(Number(e.target.value))} className="w-full px-3 py-2 rounded-xl border-2 border-gray-200" />
+                      </div>
+                    </div>
+                    {/* Time window */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-xs text-gray-500">Time Window Start (optional)</label>
+                        <input type="time" value={timeWindowStart} onChange={e => setTimeWindowStart(e.target.value)} className="w-full px-3 py-2 rounded-xl border-2 border-gray-200" />
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500">Time Window End (optional)</label>
+                        <input type="time" value={timeWindowEnd} onChange={e => setTimeWindowEnd(e.target.value)} className="w-full px-3 py-2 rounded-xl border-2 border-gray-200" />
                       </div>
                     </div>
                     {/* Assign to specific kids */}
@@ -669,9 +690,11 @@ export function ParentDashboard() {
                         <option value="bonus">Bonus</option>
                       </select>
                       <select value={scheduleType} onChange={e => setScheduleType(e.target.value)} className="px-4 py-3 rounded-xl border-2 border-gray-200">
+                        <option value="once">Once</option>
                         <option value="daily">Daily</option>
                         <option value="weekly">Weekly</option>
                         <option value="weekdays">Weekdays</option>
+                        <option value="monthly">Monthly</option>
                       </select>
                     </div>
                     <div className="grid grid-cols-3 gap-3">
@@ -686,6 +709,17 @@ export function ParentDashboard() {
                       <div>
                         <label className="text-xs text-gray-500">Max Asks</label>
                         <input type="number" value={maxAsks} onChange={e => setMaxAsks(Number(e.target.value))} className="w-full px-3 py-2 rounded-xl border-2 border-gray-200" />
+                      </div>
+                    </div>
+                    {/* Time window */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-xs text-gray-500">Time Window Start (optional)</label>
+                        <input type="time" value={timeWindowStart} onChange={e => setTimeWindowStart(e.target.value)} className="w-full px-3 py-2 rounded-xl border-2 border-gray-200" />
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500">Time Window End (optional)</label>
+                        <input type="time" value={timeWindowEnd} onChange={e => setTimeWindowEnd(e.target.value)} className="w-full px-3 py-2 rounded-xl border-2 border-gray-200" />
                       </div>
                     </div>
                     <div>

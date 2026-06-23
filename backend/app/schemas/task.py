@@ -17,8 +17,8 @@ class TaskTemplateCreate(BaseModel):
     subtasks: Optional[list[dict]] = None
     all_complete_bonus: int = 0
     max_asks: int = 2
-    bonus_first_ask: int = 10
-    penalty_per_ask: int = -5
+    bonus_first_ask: int = 0
+    penalty_per_ask: int = 0
     early_finish_bonus_per_min: int = 2
     overstay_penalty_per_min: int = -5
     schedule_type: str = "daily"
