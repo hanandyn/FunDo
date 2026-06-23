@@ -18,3 +18,4 @@ from .sound_settings import SoundSettings
 from .daily_ritual import DailyRitual
 from .family_message import FamilyMessage
 from .task_suggestion import TaskSuggestion
+from .push_subscription import PushSubscription

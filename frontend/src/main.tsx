@@ -5,6 +5,8 @@ import './index.css';
 import './lib/i18n'; // Initialize i18next
 import { setLanguageDirection } from './lib/i18n';
 import { ErrorBoundary } from './components/shared/ErrorBoundary';
+import { OfflineIndicator } from './components/shared/OfflineIndicator';
+import { flushOfflineQueue } from './lib/api';
 
 const CHUNK_RELOAD_KEY = 'fundo-chunk-reload-attempted';
 
@@ -45,6 +47,10 @@ function Root() {
         .then(() => console.log('SW registered'))
         .catch(() => console.log('SW registration failed'));
     }
+
+    if (navigator.onLine) {
+      void flushOfflineQueue();
+    }
   }, []);
 
   return (
@@ -53,6 +59,7 @@ function Root() {
       <a href="#main-content" className="skip-to-content">Skip to content</a>
       <ErrorBoundary>
         <App />
+        <OfflineIndicator />
       </ErrorBoundary>
     </React.StrictMode>
   );

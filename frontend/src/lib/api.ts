@@ -1,6 +1,42 @@
+import { enqueueOfflineRequest, flushOfflineQueue } from './offlineQueue';
+
 const API_BASE = '/api/v1';
 
 type JSONData = Record<string, unknown>;
+type OfflineQueuedResponse = JSONData & {
+  offline_queued: true;
+  message: string;
+};
+
+function canQueueOffline(path: string, options: RequestInit) {
+  const method = (options.method || 'GET').toUpperCase();
+  if (!['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) return false;
+  if (options.body && typeof options.body !== 'string') return false;
+  return (
+    path.includes('/tasks/instances/') ||
+    path.includes('/tier1/tasks/') ||
+    path.includes('/school/assignments/') ||
+    path.startsWith('/cheers') ||
+    path.startsWith('/settings/sound') ||
+    path.startsWith('/settings/theme') ||
+    path.startsWith('/settings/shabbat') ||
+    path.startsWith('/settings/rituals') ||
+    path.startsWith('/notifications/')
+  );
+}
+
+async function queueOfflineRequest<T>(path: string, options: RequestInit): Promise<T> {
+  await enqueueOfflineRequest({
+    path,
+    method: (options.method || 'GET').toUpperCase(),
+    body: typeof options.body === 'string' ? options.body : null,
+  });
+  return {
+    offline_queued: true,
+    message: 'Saved offline. It will sync when this device reconnects.',
+    points_earned: 0,
+  } as OfflineQueuedResponse as T;
+}
 
 async function apiFetch<T = JSONData>(path: string, options: RequestInit = {}): Promise<T> {
   const token = localStorage.getItem('token');
@@ -12,10 +48,21 @@ async function apiFetch<T = JSONData>(path: string, options: RequestInit = {}): 
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+  } catch (error) {
+    if (canQueueOffline(path, options)) {
+      return queueOfflineRequest<T>(path, options);
+    }
+    throw error;
+  }
   
   if (!res.ok) {
     const error = await res.json().catch(() => ({ detail: 'Request failed' }));
+    if (res.status === 503 && canQueueOffline(path, options)) {
+      return queueOfflineRequest<T>(path, options);
+    }
     throw new Error(error.detail || `HTTP ${res.status}`);
   }
   
@@ -255,6 +302,9 @@ export const api = {
 
   // Phase 7: Notification Preferences
   getNotificationPreferences: () => apiFetch('/notifications/preferences'),
+  getPushPublicKey: () => apiFetch('/notifications/push/public-key'),
+  subscribePush: (data: JSONData) => apiFetch('/notifications/push/subscribe', { method: 'POST', body: JSON.stringify(data) }),
+  unsubscribePush: (data: JSONData) => apiFetch('/notifications/push/unsubscribe', { method: 'POST', body: JSON.stringify(data) }),
 
   // Phase 8: Sound Settings
   getSoundSettings: () => apiFetch('/settings/sound'),
@@ -301,3 +351,5 @@ export const api = {
   // Phase 10: Performance
   getPerformanceMetrics: () => apiFetch('/health/performance'),
 };
+
+export { flushOfflineQueue };

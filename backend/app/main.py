@@ -15,7 +15,7 @@ from slowapi.errors import RateLimitExceeded
 from .core.config import settings
 from .core.database import create_tables, async_session, engine
 from .models import User, Family, TaskTemplate, TaskInstance, Reward, RewardRedemption, StreakHistory, Achievement, ChildAchievement, FamilyGoal, FamilyGoalProgress, Cheer, PowerUp, PowerUpPurchase, Organization, OrganizationMember, ApiKey, SeasonalEvent, HomeworkAssignment, Notification, AvatarItem, ChildAvatarItem  # noqa: F401
-from .models import SoundSettings, DailyRitual, FamilyMessage, TaskSuggestion  # noqa: F401
+from .models import SoundSettings, DailyRitual, FamilyMessage, TaskSuggestion, PushSubscription  # noqa: F401
 from .api import auth, tasks, rewards, leaderboard, achievements, family_goals, cheers, recap, powerups, settings as settings_api
 from .api import organizations, templates_marketplace, integrations, external, school, calendar, events, notifications, admin_metrics
 from .api import tier1, avatars, allowance
@@ -49,7 +49,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title=settings.APP_NAME,
-    version="0.10.0",
+    version=settings.APP_VERSION,
     lifespan=lifespan,
 )
 
@@ -186,7 +186,7 @@ async def health_check():
 
     return {
         "status": "ok" if db_ok else "degraded",
-        "version": "0.10.0",
+        "version": settings.APP_VERSION,
         "database": "connected" if db_ok else "disconnected",
     }
 
@@ -219,7 +219,7 @@ async def health_detailed():
 
     return {
         "status": "ok" if db_ok else "degraded",
-        "version": "0.10.0",
+        "version": settings.APP_VERSION,
         "database": {
             "connected": db_ok,
             "latency_ms": db_latency_ms,

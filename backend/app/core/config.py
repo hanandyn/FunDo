@@ -6,6 +6,7 @@ from typing import Optional
 
 class Settings(BaseSettings):
     APP_NAME: str = "FunDo"
+    APP_VERSION: str = "1.0.1"
     DEBUG: bool = True
     SECRET_KEY: str = "dev-secret-change-in-production-fundo"
     ALGORITHM: str = "HS256"
@@ -22,9 +23,9 @@ class Settings(BaseSettings):
         """Parse comma-separated CORS_ORIGINS into a list for FastAPI middleware."""
         origins = [o.strip() for o in self.CORS_ORIGINS.split(",") if o.strip()]
         # Always include the production domain (belt-and-suspenders for Coolify env propagation)
-        production_origin = "https://fundo.dayan.casa"
-        if production_origin not in origins:
-            origins.append(production_origin)
+        for production_origin in ("https://fundo.dayan.casa", "https://questkids.dayan.casa"):
+            if production_origin not in origins:
+                origins.append(production_origin)
         return origins
 
     # File storage path
@@ -38,6 +39,11 @@ class Settings(BaseSettings):
     SMTP_FROM: str = "noreply@fundo.local"
     SMTP_USE_TLS: bool = True
     BASE_URL: str = "http://localhost:5173"
+
+    # Browser push notifications. Set VAPID_PUBLIC_KEY/PRIVATE_KEY in production
+    # to enable real device subscriptions.
+    VAPID_PUBLIC_KEY: str = ""
+    VAPID_PRIVATE_KEY: str = ""
 
     # Rate limiting
     RATE_LIMIT_ENABLED: bool = True

@@ -567,6 +567,7 @@ export interface NotificationPreferences {
   sounds: boolean;
   voice_narration: boolean;
   toasts: boolean;
+  browser_push: boolean;
 }
 
 // Phase 8: Sound Settings
