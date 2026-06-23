@@ -1,6 +1,6 @@
-# QuestKids Platform — System Plan
+# FunDo Platform — System Plan
 
-> **Codename:** QuestKids  
+> **Codename:** FunDo  
 > **Goal:** A gamified chore & task platform that makes kids *want* to do their tasks, not dread them. Ages 3–18.  
 > **Date:** 2026-06-18
 
@@ -503,7 +503,7 @@ Kids can buy power-ups in the shop:
 
 ```
 ┌──────────────────────────────────────────────────────────┐
-│  👨‍👩‍👧 QuestKids Family                    [Add Child]    │
+│  👨‍👩‍👧 FunDo Family                    [Add Child]    │
 │                                                          │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐              │
 │  │  Yossi   │  │  Noa     │  │  David   │              │
@@ -652,7 +652,7 @@ Visible to kids (age-appropriate):
 
 Automated summary (configurable push to family WhatsApp/Telegram):
 ```
-📊 QuestKids Weekly Report
+📊 FunDo Weekly Report
 🏆 Yossi: 1,240⭐ | 94% tasks | 45-day streak 🔥
 🌟 Noa: 890⭐ | 78% tasks | 7-day streak
 🌱 David: 340⭐ | 62% tasks | Working on morning routine
@@ -930,7 +930,7 @@ Server-Sent Events (for kid devices):
 | **Habitica** | True RPG, great for adults/teens | Not designed for young kids, no parent management |
 | **Greenlight** | Real debit card, investing for kids | Chore tracking is an afterthought, not gamified |
 
-### 11.2 QuestKids Differentiation
+### 11.2 FunDo Differentiation
 
 | Feature | Gap in Market | Our Approach |
 |---------|---------------|--------------|
@@ -1034,7 +1034,7 @@ Tech:
 
 ## 13. AI-Powered Intelligence Layer
 
-> The "AI" in QuestKids isn't a chatbot gimmick. It's a silent intelligence layer that observes patterns, generates insights, and makes the platform feel *alive* — not robotic. Parents save mental energy. Kids feel understood.
+> The "AI" in FunDo isn't a chatbot gimmick. It's a silent intelligence layer that observes patterns, generates insights, and makes the platform feel *alive* — not robotic. Parents save mental energy. Kids feel understood.
 
 ### 13.1 Design Principles for AI Features
 
@@ -1363,7 +1363,7 @@ It surfaces a research-backed tip:
      (Yossi is grade 6 → ~60 min max)
    • Autonomy helps: let him choose order of subjects
    • 'Homework after school' vs 'homework after play' —
-     try both for 1 week each and compare. QuestKids can track the
+     try both for 1 week each and compare. FunDo can track the
      difference if you set up two scheduling experiments.
    
    Source: Cooper, H. (2007). The Battle Over Homework.
@@ -1464,14 +1464,14 @@ For younger kids or hands-free situations (e.g., kitchen while cooking):
 
 ```
 Kid (to device in kitchen):
-  "Hey QuestKids, I finished my shower!"
+  "Hey FunDo, I finished my shower!"
 
 System:
   "Awesome, Yossi! Timer shows 8 minutes — you earned 55 stars!
    Want me to mark homework as your next quest?"
 
 Parent (to device):
-  "QuestKids, did David feed the dog today?"
+  "FunDo, did David feed the dog today?"
 
 System:
   "Not yet — the task is still open. Would you like me to send

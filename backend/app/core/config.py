@@ -5,14 +5,14 @@ from typing import Optional
 
 
 class Settings(BaseSettings):
-    APP_NAME: str = "QuestKids"
+    APP_NAME: str = "FunDo"
     DEBUG: bool = True
-    SECRET_KEY: str = "dev-secret-change-in-production-questkids"
+    SECRET_KEY: str = "dev-secret-change-in-production-fundo"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
 
     # Database: SQLite for dev, PostgreSQL for production
-    DATABASE_URL: str = "sqlite+aiosqlite:////app/persistent/questkids.db"
+    DATABASE_URL: str = "sqlite+aiosqlite:////app/persistent/fundo.db"
 
     # CORS — stored as comma-separated string (Coolify passes plain strings, not JSON arrays)
     CORS_ORIGINS: str = "http://localhost:5173,http://localhost:3000"
@@ -22,7 +22,7 @@ class Settings(BaseSettings):
         """Parse comma-separated CORS_ORIGINS into a list for FastAPI middleware."""
         origins = [o.strip() for o in self.CORS_ORIGINS.split(",") if o.strip()]
         # Always include the production domain (belt-and-suspenders for Coolify env propagation)
-        production_origin = "https://questkids.dayan.casa"
+        production_origin = "https://fundo.dayan.casa"
         if production_origin not in origins:
             origins.append(production_origin)
         return origins
@@ -35,7 +35,7 @@ class Settings(BaseSettings):
     SMTP_PORT: int = 587
     SMTP_USER: str = ""
     SMTP_PASSWORD: str = ""
-    SMTP_FROM: str = "noreply@questkids.local"
+    SMTP_FROM: str = "noreply@fundo.local"
     SMTP_USE_TLS: bool = True
     BASE_URL: str = "http://localhost:5173"
 

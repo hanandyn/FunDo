@@ -1,8 +1,8 @@
 {
   "app": {
-    "name": "QuestKids",
+    "name": "FunDo",
     "tagline": "Welcome back, adventurer!",
-    "loading": "Loading QuestKids...",
+    "loading": "Loading FunDo...",
     "parentLabel": "Parent"
   },
   "auth": {
@@ -489,7 +489,7 @@
     "activeStreaks": "Active Streaks"
   },
   "onboarding": {
-    "welcome": "Welcome to QuestKids!",
+    "welcome": "Welcome to FunDo!",
     "welcomeDesc": "Let's set up your family's adventure.",
     "familyName": "Family Name",
     "familyNamePlaceholder": "e.g. The Smiths",

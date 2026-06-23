@@ -1,8 +1,8 @@
 {
   "app": {
-    "name": "QuestKids",
+    "name": "FunDo",
     "tagline": "ברוך שובך, הרפתקן!",
-    "loading": "טוען QuestKids...",
+    "loading": "טוען FunDo...",
     "parentLabel": "הורה"
   },
   "auth": {

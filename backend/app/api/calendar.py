@@ -57,10 +57,10 @@ async def get_child_calendar_feed(
     lines = [
         "BEGIN:VCALENDAR",
         "VERSION:2.0",
-        "PRODID:-//QuestKids//Calendar Feed//EN",
+        "PRODID:-//FunDo//Calendar Feed//EN",
         "CALSCALE:GREGORIAN",
         "METHOD:PUBLISH",
-        f"X-WR-CALNAME:QuestKids - {escape_ical(child_name)}",
+        f"X-WR-CALNAME:FunDo - {escape_ical(child_name)}",
         f"X-WR-CALDESC:Quests and milestones for {escape_ical(child_name)}",
     ]
 
@@ -70,7 +70,7 @@ async def get_child_calendar_feed(
             continue
 
         due_date = instance.date or now_utc
-        uid = f"questkids-task-{instance.id}@questkids"
+        uid = f"fundo-task-{instance.id}@fundo"
 
         # Use time window if available
         if template.time_window_start:
@@ -108,14 +108,14 @@ async def get_child_calendar_feed(
             f"DTEND:{format_ical_dt(dt_end)}",
             f"SUMMARY:{escape_ical(summary)}",
             f"DESCRIPTION:{escape_ical(description)}",
-            "CATEGORIES:QuestKids,Quest",
+            "CATEGORIES:FunDo,Quest",
             "END:VEVENT",
         ])
 
     # Add streak milestones
     if child and child.current_streak > 0:
         streak_date = now_utc
-        uid = f"questkids-streak-{child_id}@questkids"
+        uid = f"fundo-streak-{child_id}@fundo"
         lines.extend([
             "BEGIN:VEVENT",
             f"UID:{uid}",
@@ -123,7 +123,7 @@ async def get_child_calendar_feed(
             f"DTEND:{format_ical_dt(streak_date + timedelta(minutes=15))}",
             f"SUMMARY:🔥 Keep Streak Alive! ({child.current_streak} days)",
             "DESCRIPTION:Keep your streak going! Complete a quest today.",
-            "CATEGORIES:QuestKids,Streak",
+            "CATEGORIES:FunDo,Streak",
             "END:VEVENT",
         ])
 
@@ -134,7 +134,7 @@ async def get_child_calendar_feed(
         content=ical_content,
         media_type="text/calendar",
         headers={
-            "Content-Disposition": f"attachment; filename=questkids-{child_id}.ics",
+            "Content-Disposition": f"attachment; filename=fundo-{child_id}.ics",
             "Cache-Control": "no-cache",
         },
     )

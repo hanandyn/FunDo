@@ -1,8 +1,8 @@
 {
   "app": {
-    "name": "QuestKids",
+    "name": "FunDo",
     "tagline": "Bem-vindo de volta, aventureiro!",
-    "loading": "Carregando QuestKids...",
+    "loading": "Carregando FunDo...",
     "parentLabel": "Responsável"
   },
   "auth": {
@@ -453,7 +453,7 @@
     "activeStreaks": "Sequências Ativas"
   },
   "onboarding": {
-    "welcome": "Bem-vindo ao QuestKids!",
+    "welcome": "Bem-vindo ao FunDo!",
     "welcomeDesc": "Vamos configurar a aventura da sua família.",
     "familyName": "Nome da Família",
     "familyNamePlaceholder": "ex. Família Silva",
@@ -520,7 +520,7 @@
     "normal": "Normal",
     "fast": "Rápido",
     "test": "Testar Voz",
-    "testMessage": "Olá! Esta é a orientação por voz do QuestKids.",
+    "testMessage": "Olá! Esta é a orientação por voz do FunDo.",
     "customPrompt": "Mensagem de Voz Personalizada",
     "record": "Gravar",
     "recording": "Gravando...",

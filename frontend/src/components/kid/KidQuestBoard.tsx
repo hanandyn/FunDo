@@ -23,8 +23,8 @@ import { SettingsPanel } from '../settings/SettingsPanel';
 import { FamilyMessageBoard } from '../shared/FamilyMessageBoard';
 import { TaskVisual } from '../shared/TaskVisual';
 import { KidDailyRecap } from './KidDailyRecap';
-import heroImg from '../../assets/questkids-hero.jpg';
-import emptyImg from '../../assets/questkids-empty.jpg';
+import heroImg from '../../assets/fundo-hero.jpg';
+import emptyImg from '../../assets/fundo-empty.jpg';
 import { useCheers } from '../../lib/useCheers';
 import * as audio from '../../lib/audio';
 
@@ -274,7 +274,7 @@ export function KidQuestBoard() {
             <h1 className="text-xl font-bold flex items-center gap-2 cursor-pointer"
               onClick={() => { audio.playButtonClick(); setActiveView('quests'); }}
             >
-              🏰 QuestKids <span className="text-xs text-gray-300 ml-1">v1.0.0</span>
+              🏰 FunDo <span className="text-xs text-gray-300 ml-1">v1.0.0</span>
             </h1>
             <div className="flex items-center gap-2 text-sm">
               <NotificationBell />

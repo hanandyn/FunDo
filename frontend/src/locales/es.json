@@ -1,8 +1,8 @@
 {
   "app": {
-    "name": "QuestKids",
+    "name": "FunDo",
     "tagline": "¡Bienvenido de nuevo, aventurero!",
-    "loading": "Cargando QuestKids...",
+    "loading": "Cargando FunDo...",
     "parentLabel": "Padre"
   },
   "auth": {

@@ -1,8 +1,8 @@
 {
   "app": {
-    "name": "QuestKids",
+    "name": "FunDo",
     "tagline": "Welkom terug, avonturier!",
-    "loading": "QuestKids laden...",
+    "loading": "FunDo laden...",
     "parentLabel": "Ouder"
   },
   "auth": {
@@ -453,7 +453,7 @@
     "activeStreaks": "Actieve Reeksen"
   },
   "onboarding": {
-    "welcome": "Welkom bij QuestKids!",
+    "welcome": "Welkom bij FunDo!",
     "welcomeDesc": "Laten we het avontuur van jouw familie instellen.",
     "familyName": "Familienaam",
     "familyNamePlaceholder": "bijv. De Jansen",
@@ -520,7 +520,7 @@
     "normal": "Normaal",
     "fast": "Snel",
     "test": "Stem Testen",
-    "testMessage": "Hallo! Dit is de stembegeleiding van QuestKids.",
+    "testMessage": "Hallo! Dit is de stembegeleiding van FunDo.",
     "customPrompt": "Aangepaste Stembericht",
     "record": "Opnemen",
     "recording": "Opnemen...",

@@ -1,4 +1,4 @@
-# Multi-stage build: QuestKids unified image
+# Multi-stage build: FunDo unified image
 FROM node:22-alpine AS frontend-build
 WORKDIR /app
 COPY frontend/package*.json .

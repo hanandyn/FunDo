@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import { LanguageSwitcher } from '../shared/LanguageSwitcher';
-import loginBg from '../../assets/questkids-login-bg.jpg';
+import loginBg from '../../assets/fundo-login-bg.jpg';
 
 type LoginMode = 'choose' | 'kid' | 'parent';
 
@@ -74,7 +74,7 @@ export function LoginPage() {
           className="card-quest w-full max-w-md"
         >
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold mb-2">🏰 {t('app.name', 'QuestKids')}</h1>
+            <h1 className="text-4xl font-bold mb-2">🏰 {t('app.name', 'FunDo')}</h1>
             <p className="text-gray-500 text-lg">
               {t('auth.whoAreYou', 'Who are you?')}
             </p>
@@ -225,7 +225,7 @@ export function LoginPage() {
         className="card-quest w-full max-w-md"
       >
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-2">🏰 {t('app.name', 'QuestKids')}</h1>
+          <h1 className="text-4xl font-bold mb-2">🏰 {t('app.name', 'FunDo')}</h1>
           <p className="text-gray-500 text-lg">
             {isRegister ? t('auth.createAccount') : t('auth.welcomeBack')}
           </p>

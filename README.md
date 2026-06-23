@@ -1,11 +1,11 @@
-# 🏰 QuestKids
+# 🏰 FunDo
 
 > Gamified chore & task platform for kids ages 3–18  
 > **v1.0.0** — Production Release
 
 ## Overview
 
-QuestKids turns everyday chores and tasks into an adventure game. Kids earn points, level up, build streaks, and redeem rewards — while parents configure tasks, set point values, and manage the reward shop.
+FunDo turns everyday chores and tasks into an adventure game. Kids earn points, level up, build streaks, and redeem rewards — while parents configure tasks, set point values, and manage the reward shop.
 
 ## Features
 
@@ -171,7 +171,7 @@ npm run build               # Production build
 ## Project Structure
 
 ```
-questkids/
+fundo/
 ├── backend/
 │   ├── app/
 │   │   ├── api/              # FastAPI route handlers (21 modules)

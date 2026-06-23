@@ -1,6 +1,6 @@
 {
-  "name": "QuestKids",
-  "short_name": "QuestKids",
+  "name": "FunDo",
+  "short_name": "FunDo",
   "description": "Gamified chore & task platform for kids and families",
   "start_url": "/",
   "scope": "/",

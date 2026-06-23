@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to QuestKids will be documented in this file.
+All notable changes to FunDo will be documented in this file.
 
 ## [v0.9.0] — 2026-06-19 — Polish & Quality
 

@@ -27,7 +27,7 @@ export const SUPPORTED_LANGUAGES: Array<{ code: string; name: string; dir: 'ltr'
 
 const detectionOptions = {
   order: ['localStorage', 'navigator'],
-  lookupLocalStorage: 'questkids_lang',
+  lookupLocalStorage: 'fundo_lang',
   caches: ['localStorage'],
 };
 

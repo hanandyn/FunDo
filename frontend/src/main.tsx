@@ -6,7 +6,7 @@ import './lib/i18n'; // Initialize i18next
 import { setLanguageDirection } from './lib/i18n';
 import { ErrorBoundary } from './components/shared/ErrorBoundary';
 
-const CHUNK_RELOAD_KEY = 'questkids-chunk-reload-attempted';
+const CHUNK_RELOAD_KEY = 'fundo-chunk-reload-attempted';
 
 function isChunkLoadError(error: unknown) {
   const message = error instanceof Error ? error.message : String(error);
@@ -16,7 +16,7 @@ function isChunkLoadError(error: unknown) {
 async function clearAppCaches() {
   if ('caches' in window) {
     const names = await caches.keys();
-    await Promise.all(names.filter(name => name.startsWith('questkids-')).map(name => caches.delete(name)));
+    await Promise.all(names.filter(name => name.startsWith('fundo-')).map(name => caches.delete(name)));
   }
 }
 
@@ -36,7 +36,7 @@ window.addEventListener('unhandledrejection', event => recoverFromStaleChunk(eve
 // eslint-disable-next-line react-refresh/only-export-components
 function Root() {
   useEffect(() => {
-    const dir = localStorage.getItem('questkids_lang') === 'he' ? 'rtl' : 'ltr';
+    const dir = localStorage.getItem('fundo_lang') === 'he' ? 'rtl' : 'ltr';
     setLanguageDirection(dir);
 
     // Register service worker for PWA

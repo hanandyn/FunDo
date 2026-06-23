@@ -20,7 +20,7 @@ test.describe('Tasks', () => {
 
   test('should return proper CORS headers', async ({ request }) => {
     const response = await request.get(`${test.info().config.use.baseURL}/api/v1/health`, {
-      headers: { 'Origin': 'https://questkids.dayan.casa' },
+      headers: { 'Origin': 'https://fundo.dayan.casa' },
     });
     // CORS headers should be present
     const headers = response.headers();

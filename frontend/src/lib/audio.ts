@@ -42,7 +42,7 @@ export function setLanguage(lang: string): void {
 function getLang(): string {
   // Check localStorage for user preference, fallback to _lang
   try {
-    const stored = localStorage.getItem('questkids-lang');
+    const stored = localStorage.getItem('fundo-lang');
     if (stored) return stored.startsWith('he') ? 'he' : 'en';
   } catch { /* SSR */ }
   return _lang;

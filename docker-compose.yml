@@ -6,11 +6,11 @@ services:
     expose:
       - "8000"
     volumes:
-      - questkids_data:/app/data
+      - fundo_data:/app/data
       - ./uploads:/app/uploads
     environment:
-      - DATABASE_URL=postgresql+asyncpg://questkids:${DB_PASSWORD:-questkids}@db:5432/questkids
-      - SECRET_KEY=${SECRET_KEY:-change-this-in-production-questkids}
+      - DATABASE_URL=postgresql+asyncpg://fundo:${DB_PASSWORD:-fundo}@db:5432/fundo
+      - SECRET_KEY=${SECRET_KEY:-change-this-in-production-fundo}
       - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:5173,http://localhost:3000,http://localhost}
       - DEBUG=${DEBUG:-false}
     depends_on:
@@ -27,13 +27,13 @@ services:
   db:
     image: postgres:16-alpine
     environment:
-      - POSTGRES_USER=questkids
-      - POSTGRES_PASSWORD=${DB_PASSWORD:-questkids}
-      - POSTGRES_DB=questkids
+      - POSTGRES_USER=fundo
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-fundo}
+      - POSTGRES_DB=fundo
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U questkids"]
+      test: ["CMD-SHELL", "pg_isready -U fundo"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -57,14 +57,14 @@ services:
       - coolify
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.questkids.rule=Host(`questkids.dayan.casa`)"
-      - "traefik.http.routers.questkids.entrypoints=http"
-      - "traefik.http.services.questkids.loadbalancer.server.port=80"
+      - "traefik.http.routers.fundo.rule=Host(`fundo.dayan.casa`)"
+      - "traefik.http.routers.fundo.entrypoints=http"
+      - "traefik.http.services.fundo.loadbalancer.server.port=80"
 
 networks:
   coolify:
     external: true
 
 volumes:
-  questkids_data:
+  fundo_data:
   postgres_data:

@@ -268,13 +268,13 @@ async def send_verification_email(email: str, token: str):
     """Send verification email via SMTP. Falls back to logging if SMTP is not configured."""
     verify_url = f"{settings.BASE_URL}/verify-email?token={token}"
 
-    subject = "Verify your email — QuestKids 🏰"
+    subject = "Verify your email — FunDo 🏰"
     body = f"""
-    <h2>Welcome to QuestKids! 🏰</h2>
+    <h2>Welcome to FunDo! 🏰</h2>
     <p>Click the link below to verify your email address:</p>
     <p><a href="{verify_url}" style="padding:12px 24px;background:#6366f1;color:white;text-decoration:none;border-radius:8px;">Verify Email</a></p>
     <p>Or copy this URL: {verify_url}</p>
-    <p>If you didn't create a QuestKids account, you can ignore this email.</p>
+    <p>If you didn't create a FunDo account, you can ignore this email.</p>
     """
 
     try:

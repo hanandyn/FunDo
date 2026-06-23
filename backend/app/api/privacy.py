@@ -38,7 +38,7 @@ async def export_user_data(current_user: User = Depends(get_current_user)):
         return JSONResponse(
             content=data,
             headers={
-                "Content-Disposition": f'attachment; filename="questkids-data-{current_user.username}.json"',
+                "Content-Disposition": f'attachment; filename="fundo-data-{current_user.username}.json"',
                 "Content-Type": "application/json; charset=utf-8",
             },
         )

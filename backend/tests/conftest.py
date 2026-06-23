@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, Asyn
 
 from app.core.database import Base
 
-TEST_DB = "sqlite+aiosqlite:///./test_questkids.db"
+TEST_DB = "sqlite+aiosqlite:///./test_fundo.db"
 
 
 @pytest_asyncio.fixture

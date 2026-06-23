@@ -338,7 +338,7 @@ class TestCalendar:
             content = resp.text
             assert "BEGIN:VCALENDAR" in content
             assert "END:VCALENDAR" in content
-            assert "QuestKids" in content
+            assert "FunDo" in content
         finally:
             await client.aclose()
 

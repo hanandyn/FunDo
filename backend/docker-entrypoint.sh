@@ -2,7 +2,7 @@
 # Docker entrypoint — runs migrations then starts the app
 set -e
 
-echo "=== QuestKids Backend ==="
+echo "=== FunDo Backend ==="
 echo "Database: ${DATABASE_URL}"
 
 # Wait for PostgreSQL if using it
@@ -23,5 +23,5 @@ if [[ "$DATABASE_URL" == postgresql* ]]; then
     done
 fi
 
-echo "Starting QuestKids v0.5.0..."
+echo "Starting FunDo v0.5.0..."
 exec "$@"

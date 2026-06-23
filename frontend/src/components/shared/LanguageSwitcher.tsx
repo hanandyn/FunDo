@@ -8,7 +8,7 @@ export function LanguageSwitcher() {
 
   const handleChange = (code: string) => {
     i18n.changeLanguage(code);
-    localStorage.setItem('questkids_lang', code);
+    localStorage.setItem('fundo_lang', code);
     const lang = SUPPORTED_LANGUAGES.find(l => l.code === code);
     setLanguageDirection((lang?.dir as 'ltr' | 'rtl') || 'ltr');
   };

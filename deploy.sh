@@ -1,5 +1,5 @@
 #!/bin/bash
-# QuestKids one-click deploy script
+# FunDo one-click deploy script
 # Usage: ./deploy.sh [up|down|restart|logs]
 
 set -e
@@ -21,7 +21,7 @@ COMMAND=${1:-up}
 
 case "$COMMAND" in
   up)
-    info "Setting up QuestKids..."
+    info "Setting up FunDo..."
 
     # Check for .env
     if [ ! -f .env ]; then
@@ -59,7 +59,7 @@ case "$COMMAND" in
     fi
 
     echo ""
-    echo "  ✅ QuestKids is running!"
+    echo "  ✅ FunDo is running!"
     echo "  Frontend:  http://localhost:${FRONTEND_PORT:-80}"
     echo "  Backend:   http://localhost:8000"
     echo "  API Docs:  http://localhost:8000/docs"
@@ -67,13 +67,13 @@ case "$COMMAND" in
     ;;
 
   down)
-    info "Stopping QuestKids..."
+    info "Stopping FunDo..."
     docker compose down
     success "Stopped."
     ;;
 
   restart)
-    info "Restarting QuestKids..."
+    info "Restarting FunDo..."
     docker compose restart
     success "Restarted."
     ;;
@@ -85,8 +85,8 @@ case "$COMMAND" in
   *)
     echo "Usage: ./deploy.sh [up|down|restart|logs]"
     echo ""
-    echo "  up      — Start QuestKids (builds if needed)"
-    echo "  down    — Stop QuestKids"
+    echo "  up      — Start FunDo (builds if needed)"
+    echo "  down    — Stop FunDo"
     echo "  restart — Restart all services"
     echo "  logs    — View logs (optionally: logs [service])"
     exit 1

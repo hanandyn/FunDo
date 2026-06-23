@@ -1,4 +1,4 @@
-"""QuestKids FastAPI application entry point."""
+"""FunDo FastAPI application entry point."""
 
 import os
 import time

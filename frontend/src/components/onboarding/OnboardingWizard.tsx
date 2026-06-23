@@ -19,7 +19,7 @@ function WelcomeStep({ onNext, data }: StepProps) {
     <div className="text-center">
       <div className="text-8xl mb-6">🏰</div>
       <h1 className="text-3xl font-bold text-quest-dark mb-4">
-        {t('onboarding.welcome', 'Welcome to QuestKids!')}
+        {t('onboarding.welcome', 'Welcome to FunDo!')}
       </h1>
       <p className="text-gray-600 mb-8 max-w-md mx-auto">
         {t('onboarding.welcomeDesc', "Let's set up your family's adventure. We'll help your kids turn everyday tasks into epic quests!")}
@@ -386,7 +386,7 @@ function DoneStep({ data, onPrev }: StepProps) {
         await api.createChild({
           username: childUsername,
           display_name: child.name,
-          email: `${childUsername}@questkids.local`,
+          email: `${childUsername}@fundo.local`,
           password: childPassword,
           role: 'child',
           age_tier: child.tier,

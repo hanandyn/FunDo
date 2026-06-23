@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 
-const COOKIE_CONSENT_KEY = 'questkids_cookie_consent';
+const COOKIE_CONSENT_KEY = 'fundo_cookie_consent';
 
 /**
  * CookieConsentBanner — minimal GDPR cookie consent banner.

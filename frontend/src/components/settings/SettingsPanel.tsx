@@ -57,7 +57,7 @@ export function SettingsPanel({ isParent = false, onClose }: SettingsPanelProps)
         language: language,
       });
       // Apply language
-      localStorage.setItem('questkids_lang', language);
+      localStorage.setItem('fundo_lang', language);
       i18n.changeLanguage(language);
       const lang = SUPPORTED_LANGUAGES.find(l => l.code === language);
       setLanguageDirection(lang?.dir || 'ltr');

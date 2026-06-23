@@ -59,7 +59,7 @@ function AppContent() {
 
   // Apply theme and direction on mount
   useEffect(() => {
-    const lang = localStorage.getItem('questkids_lang') || 'en';
+    const lang = localStorage.getItem('fundo_lang') || 'en';
     const langDef = SUPPORTED_LANGUAGES.find(l => l.code === lang);
     setLanguageDirection((langDef?.dir as 'ltr' | 'rtl') || 'ltr');
 

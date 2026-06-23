@@ -1,9 +1,9 @@
 #!/bin/bash
-# QuestKids Database Backup Script
+# FunDo Database Backup Script
 # Dumps PostgreSQL to a timestamped SQL file, keeps last 7 daily backups.
 #
 # Usage: ./scripts/backup-db.sh
-# Cron: 0 3 * * * /home/openclaw/.openclaw/workspace/questkids/scripts/backup-db.sh
+# Cron: 0 3 * * * /home/openclaw/.openclaw/workspace/fundo/scripts/backup-db.sh
 
 set -euo pipefail
 
@@ -11,7 +11,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 BACKUP_DIR="${BACKUP_DIR:-${SCRIPT_DIR}/../backups}"
 RETENTION_DAYS="${RETENTION_DAYS:-7}"
 TIMESTAMP=$(date +"%Y-%m-%d_%H%M%S")
-BACKUP_FILE="${BACKUP_DIR}/questkids_${TIMESTAMP}.sql"
+BACKUP_FILE="${BACKUP_DIR}/fundo_${TIMESTAMP}.sql"
 
 # Load environment
 if [ -f "${SCRIPT_DIR}/../.env" ]; then
@@ -22,17 +22,17 @@ fi
 
 DB_HOST="${DB_HOST:-db}"
 DB_PORT="${DB_PORT:-5432}"
-DB_USER="${DB_USER:-questkids}"
-DB_PASSWORD="${DB_PASSWORD:-questkids}"
-DB_NAME="${DB_NAME:-questkids}"
+DB_USER="${DB_USER:-fundo}"
+DB_PASSWORD="${DB_PASSWORD:-fundo}"
+DB_NAME="${DB_NAME:-fundo}"
 
 mkdir -p "${BACKUP_DIR}"
 
-echo "[$(date '+%Y-%m-%d %H:%M:%S')] Starting QuestKids database backup..."
+echo "[$(date '+%Y-%m-%d %H:%M:%S')] Starting FunDo database backup..."
 
 # Try Docker-based dump first (if DB is in docker-compose)
-if command -v docker &> /dev/null && docker ps --format '{{.Names}}' 2>/dev/null | grep -q 'questkids.*db'; then
-    CONTAINER=$(docker ps --format '{{.Names}}' | grep 'questkids.*db' | head -1)
+if command -v docker &> /dev/null && docker ps --format '{{.Names}}' 2>/dev/null | grep -q 'fundo.*db'; then
+    CONTAINER=$(docker ps --format '{{.Names}}' | grep 'fundo.*db' | head -1)
     echo "[INFO] Dumping via Docker container: ${CONTAINER}"
     docker exec "${CONTAINER}" pg_dump -U "${DB_USER}" -d "${DB_NAME}" > "${BACKUP_FILE}"
 elif command -v pg_dump &> /dev/null; then
@@ -56,7 +56,7 @@ fi
 
 # Cleanup old backups
 echo "[INFO] Cleaning backups older than ${RETENTION_DAYS} days..."
-find "${BACKUP_DIR}" -name "questkids_*.sql.gz" -mtime +"${RETENTION_DAYS}" -delete 2>/dev/null || true
+find "${BACKUP_DIR}" -name "fundo_*.sql.gz" -mtime +"${RETENTION_DAYS}" -delete 2>/dev/null || true
 
-BACKUP_COUNT=$(find "${BACKUP_DIR}" -name "questkids_*.sql.gz" | wc -l)
+BACKUP_COUNT=$(find "${BACKUP_DIR}" -name "fundo_*.sql.gz" | wc -l)
 echo "[OK] Backup complete. ${BACKUP_COUNT} backups retained."

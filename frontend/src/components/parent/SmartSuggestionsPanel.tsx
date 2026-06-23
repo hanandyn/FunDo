@@ -92,7 +92,7 @@ export function SmartSuggestionsPanel() {
 
       {suggestions.length === 0 ? (
         <p className="text-sm text-gray-400 text-center py-4">
-          No suggestions right now. Keep using QuestKids and I&apos;ll find optimizations!
+          No suggestions right now. Keep using FunDo and I&apos;ll find optimizations!
         </p>
       ) : (
         <AnimatePresence>

@@ -1,4 +1,4 @@
-# Contributing to QuestKids
+# Contributing to FunDo
 
 Thanks for contributing! Here's how to get started.
 
@@ -43,7 +43,7 @@ docker compose up --build
 
 ### Backend
 
-QuestKids uses FastAPI with async SQLAlchemy. Key patterns:
+FunDo uses FastAPI with async SQLAlchemy. Key patterns:
 
 - **Models**: SQLAlchemy ORM models in `backend/app/models/`
 - **Schemas**: Pydantic request/response models in `backend/app/schemas/`
@@ -150,7 +150,7 @@ Detailed bullet points of changes...
 
 ## Deployment
 
-QuestKids deploys via Coolify:
+FunDo deploys via Coolify:
 
 ```bash
 ./deploy.sh <coolify_app_uuid>

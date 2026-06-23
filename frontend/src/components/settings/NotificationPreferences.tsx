@@ -19,7 +19,7 @@ const DEFAULT_PREFS: NotificationPreferences = {
 export function NotificationPreferencesPanel() {
   const [prefs, setPrefs] = useState<NotificationPreferences>(() => {
     try {
-      const saved = localStorage.getItem('questkids_notification_prefs');
+      const saved = localStorage.getItem('fundo_notification_prefs');
       return saved ? { ...DEFAULT_PREFS, ...JSON.parse(saved) } : DEFAULT_PREFS;
     } catch {
       return DEFAULT_PREFS;
@@ -27,7 +27,7 @@ export function NotificationPreferencesPanel() {
   });
 
   useEffect(() => {
-    localStorage.setItem('questkids_notification_prefs', JSON.stringify(prefs));
+    localStorage.setItem('fundo_notification_prefs', JSON.stringify(prefs));
     audio.setMuted(!prefs.sounds);
     audio.setVoiceEnabled(prefs.voice_narration);
   }, [prefs]);

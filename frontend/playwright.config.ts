@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
- * Playwright E2E test configuration for QuestKids.
+ * Playwright E2E test configuration for FunDo.
  * Targets the live deployment by default, with local dev option.
  */
 export default defineConfig({
@@ -19,7 +19,7 @@ export default defineConfig({
     ['list'],
   ],
   use: {
-    baseURL: process.env.E2E_BASE_URL || 'https://questkids.dayan.casa',
+    baseURL: process.env.E2E_BASE_URL || 'https://fundo.dayan.casa',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     actionTimeout: 15000,

@@ -23,7 +23,7 @@ const DEFAULT_SETTINGS: VoiceSettings = {
   customPrompts: {},
 };
 
-const VOICE_STORAGE_KEY = 'questkids_voice_settings';
+const VOICE_STORAGE_KEY = 'fundo_voice_settings';
 
 function getSettings(): VoiceSettings {
   try {
