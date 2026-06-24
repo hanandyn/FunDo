@@ -12,17 +12,17 @@ import it from '../locales/it.json';
 import nl from '../locales/nl.json';
 import ja from '../locales/ja.json';
 
-export const SUPPORTED_LANGUAGES: Array<{ code: string; name: string; dir: 'ltr' | 'rtl' }> = [
-  { code: 'en', name: 'English', dir: 'ltr' as const },
-  { code: 'es', name: 'Español', dir: 'ltr' as const },
-  { code: 'fr', name: 'Français', dir: 'ltr' as const },
-  { code: 'pt', name: 'Português', dir: 'ltr' as const },
-  { code: 'it', name: 'Italiano', dir: 'ltr' as const },
-  { code: 'nl', name: 'Nederlands', dir: 'ltr' as const },
-  { code: 'ja', name: '日本語', dir: 'ltr' as const },
-  { code: 'ru', name: 'Русский', dir: 'ltr' as const },
-  { code: 'he', name: 'עברית', dir: 'rtl' as const },
-  { code: 'ar', name: 'العربية', dir: 'rtl' as const },
+export const SUPPORTED_LANGUAGES: Array<{ code: string; name: string; flag: string; dir: 'ltr' | 'rtl' }> = [
+  { code: 'en', name: 'English', flag: '🇺🇸', dir: 'ltr' as const },
+  { code: 'es', name: 'Español', flag: '🇪🇸', dir: 'ltr' as const },
+  { code: 'fr', name: 'Français', flag: '🇫🇷', dir: 'ltr' as const },
+  { code: 'pt', name: 'Português', flag: '🇵🇹', dir: 'ltr' as const },
+  { code: 'it', name: 'Italiano', flag: '🇮🇹', dir: 'ltr' as const },
+  { code: 'nl', name: 'Nederlands', flag: '🇳🇱', dir: 'ltr' as const },
+  { code: 'ja', name: '日本語', flag: '🇯🇵', dir: 'ltr' as const },
+  { code: 'ru', name: 'Русский', flag: '🇷🇺', dir: 'ltr' as const },
+  { code: 'he', name: 'עברית', flag: '🇮🇱', dir: 'rtl' as const },
+  { code: 'ar', name: 'العربية', flag: '🇸🇦', dir: 'rtl' as const },
 ];
 
 const detectionOptions = {

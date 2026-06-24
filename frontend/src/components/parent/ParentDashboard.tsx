@@ -17,6 +17,7 @@ import { SmartSuggestionsPanel } from './SmartSuggestionsPanel';
 import { AnalyticsDashboard } from './AnalyticsDashboard';
 import { FamilyMessageBoard } from '../shared/FamilyMessageBoard';
 import { RitualSettings } from '../settings/RitualSettings';
+import { SettingsPanel } from '../settings/SettingsPanel';
 import { KidCredentialsPanel } from './KidCredentialsPanel';
 import { ParentTaskManagement } from './ParentTaskManagement';
 import { NLTaskCreator } from './NLTaskCreator';
@@ -45,7 +46,7 @@ export function ParentDashboard() {
   const [children, setChildren] = useState<User[]>([]);
   const [templates, setTemplates] = useState<TaskTemplate[]>([]);
   const [rewards, setRewards] = useState<Reward[]>([]);
-  const [activeTab, setActiveTab] = useState<'children' | 'tasks' | 'manage' | 'rewards' | 'goals' | 'recap' | 'insights' | 'organizations' | 'marketplace' | 'calendar' | 'teacher' | 'metrics' | 'analytics' | 'suggestions' | 'rituals' | 'approvals'>('children');
+  const [activeTab, setActiveTab] = useState<'children' | 'tasks' | 'manage' | 'rewards' | 'goals' | 'recap' | 'insights' | 'organizations' | 'marketplace' | 'calendar' | 'teacher' | 'metrics' | 'analytics' | 'suggestions' | 'rituals' | 'approvals' | 'settings'>('children');
   const [showAddChild, setShowAddChild] = useState(false);
   const [showAddTask, setShowAddTask] = useState(false);
   const [showAddReward, setShowAddReward] = useState(false);
@@ -298,7 +299,7 @@ export function ParentDashboard() {
         {/* Tab Navigation */}
         <div className="-mx-4 mb-6 overflow-x-auto px-4 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <div className="flex w-max gap-2">
-          {(['children', 'tasks', 'manage', 'rewards', 'goals', 'recap', 'insights', 'analytics', 'suggestions', 'rituals', 'marketplace', 'organizations', 'calendar', 'teacher', 'metrics', 'approvals'] as const).map(tab => (
+          {(['children', 'tasks', 'manage', 'rewards', 'goals', 'recap', 'insights', 'analytics', 'suggestions', 'rituals', 'marketplace', 'organizations', 'calendar', 'teacher', 'metrics', 'approvals', 'settings'] as const).map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -308,7 +309,7 @@ export function ParentDashboard() {
                   : 'bg-white text-gray-600 hover:bg-gray-50'
               }`}
             >
-              {tab === 'children' ? '👶 Children' : tab === 'manage' ? '⚖️ Manage' : tab === 'tasks' ? '📋 Tasks' : tab === 'rewards' ? '🎁 Rewards' : tab === 'goals' ? '🎯 Goals' : tab === 'recap' ? '📊 Recap' : tab === 'insights' ? '💡 Insights' : tab === 'analytics' ? '📊 Analytics' : tab === 'suggestions' ? '🧠 Tips' : tab === 'rituals' ? '🌅 Rituals' : tab === 'marketplace' ? '📋 Marketplace' : tab === 'organizations' ? '🏫 Orgs' : tab === 'calendar' ? '📅 Calendar' : tab === 'teacher' ? '👩‍🏫 Teacher' : tab === 'approvals' ? '📸 Approvals' : '📈 Metrics'}
+              {tab === 'children' ? '👶 Children' : tab === 'manage' ? '⚖️ Manage' : tab === 'tasks' ? '📋 Tasks' : tab === 'rewards' ? '🎁 Rewards' : tab === 'goals' ? '🎯 Goals' : tab === 'recap' ? '📊 Recap' : tab === 'insights' ? '💡 Insights' : tab === 'analytics' ? '📊 Analytics' : tab === 'suggestions' ? '🧠 Tips' : tab === 'rituals' ? '🌅 Rituals' : tab === 'marketplace' ? '📋 Marketplace' : tab === 'organizations' ? '🏫 Orgs' : tab === 'calendar' ? '📅 Calendar' : tab === 'teacher' ? '👩‍🏫 Teacher' : tab === 'approvals' ? '📸 Approvals' : tab === 'settings' ? '⚙️ Settings' : '📈 Metrics'}
             </button>
           ))}
           </div>
@@ -907,6 +908,9 @@ export function ParentDashboard() {
 
         {/* Photo Approval Queue */}
         {activeTab === 'approvals' && <PhotoApprovalQueue />}
+
+        {/* Settings */}
+        {activeTab === 'settings' && <SettingsPanel isParent onClose={() => setActiveTab('children')} />}
 
         {/* Phase 8: Fulfillment Queue + Family Board (shown on Children tab) */}
         {activeTab === 'children' && (
