@@ -4,7 +4,6 @@ import { api } from '../../lib/api';
 import { useAuth } from '../../contexts/AuthContext';
 import type { TaskInstance, KidRecap, AllowanceStatus } from '../../lib/types';
 import { CountdownTimer } from '../timer/CountdownTimer';
-import { FamilyMessageBoard } from '../shared/FamilyMessageBoard';
 import { KidDailyRecap } from './KidDailyRecap';
 import { RewardShop } from './RewardShop';
 import { TaskVisual } from '../shared/TaskVisual';
@@ -555,11 +554,6 @@ export function TeenDashboard() {
       {/* Daily Recap */}
       <div className="max-w-2xl mx-auto px-4">
         <KidDailyRecap />
-      </div>
-
-      {/* Family Message Board */}
-      <div className="max-w-5xl mx-auto px-4 pb-6">
-        <FamilyMessageBoard />
       </div>
 
       {/* Touch handler for pull-to-refresh */}

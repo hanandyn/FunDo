@@ -111,9 +111,10 @@ export function FamilyMessageBoard() {
         <button
           onClick={handleSend}
           disabled={sending || !newMessage.trim()}
-          className="px-4 py-2 bg-indigo-500 text-white text-sm rounded-lg hover:bg-indigo-600 disabled:opacity-50 transition-colors"
+          className="w-10 h-10 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 disabled:opacity-50 transition-colors flex items-center justify-center text-lg"
+          aria-label="Send message"
         >
-          {sending ? '...' : 'Send'}
+          {sending ? '⏳' : '📤'}
         </button>
       </div>
     </div>

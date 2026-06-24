@@ -7,7 +7,6 @@ import { CountdownTimer } from '../timer/CountdownTimer';
 import { KidDailyRecap } from './KidDailyRecap';
 import { RewardShop } from './RewardShop';
 import { TaskVisual } from '../shared/TaskVisual';
-import { FamilyMessageBoard } from '../shared/FamilyMessageBoard';
 import * as audio from '../../lib/audio';
 
 type ViewType = 'today' | 'habits' | 'money' | 'goals' | 'insights' | 'shop';
@@ -681,11 +680,6 @@ export function YoungAdultDashboard() {
       {/* Daily recap component */}
       <div className="max-w-4xl mx-auto px-5 pb-6">
         <KidDailyRecap />
-      </div>
-
-      {/* Family Message Board */}
-      <div className="max-w-4xl mx-auto px-5 pb-6">
-        <FamilyMessageBoard />
       </div>
 
       {/* Pull-to-refresh */}
