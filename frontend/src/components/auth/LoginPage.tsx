@@ -8,6 +8,83 @@ import loginBg from '../../assets/fundo-login-bg.jpg';
 
 type LoginMode = 'choose' | 'kid' | 'parent';
 
+function ServerConfigDialog({
+  show,
+  serverUrl,
+  serverMsg,
+  onClose,
+  onSave,
+  onReset,
+  onServerUrlChange,
+}: {
+  show: boolean;
+  serverUrl: string;
+  serverMsg: string;
+  onClose: () => void;
+  onSave: () => void;
+  onReset: () => void;
+  onServerUrlChange: (value: string) => void;
+}) {
+  return (
+    <AnimatePresence>
+      {show && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          onClick={onClose}
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            onClick={e => e.stopPropagation()}
+            className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl"
+          >
+            <h2 className="text-xl font-bold mb-1">🖥️ Server Settings</h2>
+            <p className="text-sm text-gray-500 mb-4">Enter your FunDo server address (URL or IP:port)</p>
+            <input
+              type="text"
+              value={serverUrl}
+              onChange={e => onServerUrlChange(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-quest-blue outline-none text-lg mb-3"
+              placeholder={DEFAULT_PRODUCTION_ORIGIN}
+            />
+            {serverMsg && (
+              <div className="bg-green-50 border border-green-200 text-green-700 px-3 py-2 rounded-lg text-sm mb-3">
+                {serverMsg}
+              </div>
+            )}
+            <div className="flex gap-2">
+              <button
+                onClick={onSave}
+                className="flex-1 bg-quest-blue text-white font-bold py-3 rounded-xl hover:bg-quest-blue/90 transition-colors"
+              >
+                Save & Reload
+              </button>
+              {serverUrl && (
+                <button
+                  onClick={onReset}
+                  className="px-4 py-3 bg-gray-100 text-gray-600 font-bold rounded-xl hover:bg-gray-200 transition-colors"
+                >
+                  Reset
+                </button>
+              )}
+            </div>
+            <button
+              onClick={onClose}
+              className="w-full mt-3 text-gray-400 hover:text-gray-600 text-sm"
+            >
+              Cancel
+            </button>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
 export function LoginPage() {
   const { t } = useTranslation();
   const { login, register } = useAuth();
@@ -30,6 +107,25 @@ export function LoginPage() {
     setServerMsg(trimmed ? `Server set to ${trimmed}. Reloading...` : 'Server reset to default. Reloading...');
     setTimeout(() => window.location.reload(), 1200);
   };
+
+  const handleServerReset = () => {
+    setServerUrl('');
+    setUserServerUrl('');
+    setServerMsg('Server reset to default. Reloading...');
+    setTimeout(() => window.location.reload(), 1200);
+  };
+
+  const serverConfigDialog = (
+    <ServerConfigDialog
+      show={showServerConfig}
+      serverUrl={serverUrl}
+      serverMsg={serverMsg}
+      onClose={() => setShowServerConfig(false)}
+      onSave={handleServerSave}
+      onReset={handleServerReset}
+      onServerUrlChange={value => { setServerUrl(value); setServerMsg(''); }}
+    />
+  );
 
   // Kid login state
   const [kidUsername, setKidUsername] = useState('');
@@ -76,71 +172,11 @@ export function LoginPage() {
     }
   };
 
-  // Server config dialog component
-  const ServerConfigDialog = () => (
-    <AnimatePresence>
-      {showServerConfig && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-          onClick={() => setShowServerConfig(false)}
-        >
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
-            onClick={e => e.stopPropagation()}
-            className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl"
-          >
-            <h2 className="text-xl font-bold mb-1">🖥️ Server Settings</h2>
-            <p className="text-sm text-gray-500 mb-4">Enter your FunDo server address (URL or IP:port)</p>
-            <input
-              type="text"
-              value={serverUrl}
-              onChange={e => { setServerUrl(e.target.value); setServerMsg(''); }}
-              className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-quest-blue outline-none text-lg mb-3"
-              placeholder={DEFAULT_PRODUCTION_ORIGIN}
-            />
-            {serverMsg && (
-              <div className="bg-green-50 border border-green-200 text-green-700 px-3 py-2 rounded-lg text-sm mb-3">
-                {serverMsg}
-              </div>
-            )}
-            <div className="flex gap-2">
-              <button
-                onClick={handleServerSave}
-                className="flex-1 bg-quest-blue text-white font-bold py-3 rounded-xl hover:bg-quest-blue/90 transition-colors"
-              >
-                Save & Reload
-              </button>
-              {serverUrl && (
-                <button
-                  onClick={() => { setServerUrl(''); setUserServerUrl(''); setServerMsg('Server reset to default. Reloading...'); setTimeout(() => window.location.reload(), 1200); }}
-                  className="px-4 py-3 bg-gray-100 text-gray-600 font-bold rounded-xl hover:bg-gray-200 transition-colors"
-                >
-                  Reset
-                </button>
-              )}
-            </div>
-            <button
-              onClick={() => setShowServerConfig(false)}
-              className="w-full mt-3 text-gray-400 hover:text-gray-600 text-sm"
-            >
-              Cancel
-            </button>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-
   // ── Mode chooser ──────────────────────────────────────────────
   if (mode === 'choose') {
     return (
       <div className="min-h-screen flex items-center justify-center p-4" dir={document.documentElement.dir} style={{backgroundImage: `linear-gradient(rgba(99,102,241,0.65), rgba(168,85,247,0.65)), url(${loginBg})`, backgroundSize: "cover", backgroundPosition: "center"}}>
-        <ServerConfigDialog />
+        {serverConfigDialog}
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -190,7 +226,7 @@ export function LoginPage() {
   if (mode === 'kid') {
     return (
       <div className="min-h-screen flex items-center justify-center p-4" dir={document.documentElement.dir} style={{backgroundImage: `linear-gradient(rgba(236,72,153,0.6), rgba(147,51,234,0.6)), url(${loginBg})`, backgroundSize: "cover", backgroundPosition: "center"}}>
-        <ServerConfigDialog />
+        {serverConfigDialog}
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -311,7 +347,7 @@ export function LoginPage() {
   // ── Parent login ───────────────────────────────────────────────
   return (
     <div className="min-h-screen flex items-center justify-center p-4" dir={document.documentElement.dir} style={{backgroundImage: `linear-gradient(rgba(59,130,246,0.6), rgba(139,92,246,0.6)), url(${loginBg})`, backgroundSize: "cover", backgroundPosition: "center"}}>
-      <ServerConfigDialog />
+      {serverConfigDialog}
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}

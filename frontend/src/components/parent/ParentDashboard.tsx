@@ -297,13 +297,13 @@ export function ParentDashboard() {
         )}
 
         {/* Tab Navigation */}
-        <div className="-mx-4 mb-6 overflow-x-auto px-4 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <div className="flex w-max gap-2">
+        <div className="-mx-4 mb-6 overflow-x-auto px-4 pb-2">
+          <div className="flex w-max gap-2 pr-4">
           {(['children', 'tasks', 'manage', 'rewards', 'goals', 'recap', 'insights', 'analytics', 'suggestions', 'rituals', 'marketplace', 'organizations', 'calendar', 'teacher', 'metrics', 'approvals', 'settings', 'family'] as const).map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`shrink-0 px-4 py-2.5 sm:px-6 sm:py-3 rounded-xl font-bold text-sm sm:text-lg transition-all ${
+              className={`shrink-0 whitespace-nowrap px-4 py-2.5 sm:px-5 sm:py-3 rounded-xl font-bold text-sm sm:text-base transition-all ${
                 activeTab === tab
                   ? 'bg-quest-blue text-white shadow-lg'
                   : 'bg-white text-gray-600 hover:bg-gray-50'
@@ -492,11 +492,11 @@ export function ParentDashboard() {
                 <NLTaskCreator children={children} onCreated={() => { loadData(); }} />
                 <button
                   onClick={() => setShowAddTask(true)}
-                  className="min-h-11 rounded-xl bg-quest-blue px-3 py-2 text-sm font-bold text-white transition-colors hover:bg-blue-600 sm:px-4"
+                  className="inline-flex min-h-11 items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-quest-blue px-3 py-2 text-sm font-bold text-white transition-colors hover:bg-blue-600 sm:px-4"
                 >
                   + Create Task
                 </button>
-                <button onClick={() => handleCleanOrphaned()} className="col-span-2 min-h-11 rounded-xl bg-gray-200 px-3 py-2 text-sm font-bold text-gray-700 transition-colors hover:bg-gray-300 sm:col-span-1 sm:px-4" title="Remove tasks from deleted templates">
+                <button onClick={() => handleCleanOrphaned()} className="col-span-2 inline-flex min-h-11 items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-gray-200 px-3 py-2 text-sm font-bold text-gray-700 transition-colors hover:bg-gray-300 sm:col-span-1 sm:px-4" title="Remove tasks from deleted templates">
                   🧹 Clean
                 </button>
               </div>

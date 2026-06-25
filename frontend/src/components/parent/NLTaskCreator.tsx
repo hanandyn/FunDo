@@ -75,7 +75,7 @@ export function NLTaskCreator({ children, onCreated }: { children: User[]; onCre
     <>
       <button
         onClick={() => setShow(!show)}
-        className="min-h-11 rounded-xl bg-purple-100 px-3 py-2 text-sm font-bold text-purple-700 transition-colors hover:bg-purple-200 focus-ring sm:px-4"
+        className="inline-flex min-h-11 items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-purple-100 px-3 py-2 text-sm font-bold text-purple-700 transition-colors hover:bg-purple-200 focus-ring sm:px-4"
       >
         ✨ {t('parent.nlCreate', 'Describe a Task')}
       </button>
@@ -115,7 +115,7 @@ export function NLTaskCreator({ children, onCreated }: { children: User[]; onCre
               <button
                 onClick={handleParse}
                 disabled={busy || !text.trim()}
-                className="btn-primary mt-3 text-sm"
+                className="mt-3 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-quest-blue px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-blue-600 disabled:opacity-50"
               >
                 {busy ? '⏳...' : `🔮 ${t('parent.parse', 'Parse')}`}
               </button>
@@ -149,10 +149,10 @@ export function NLTaskCreator({ children, onCreated }: { children: User[]; onCre
                   </div>
 
                   <div className="flex gap-3 mt-3">
-                    <button onClick={handleCreate} disabled={busy} className="btn-primary flex-1 text-sm">
+                    <button onClick={handleCreate} disabled={busy} className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-quest-blue px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-blue-600 disabled:opacity-50">
                       ✅ {t('parent.createTask', 'Create Task')}
                     </button>
-                    <button onClick={() => setParsed(null)} className="btn-quest bg-gray-200 text-sm">
+                    <button onClick={() => setParsed(null)} className="min-h-11 rounded-xl bg-gray-100 px-4 py-2 text-sm font-bold text-gray-600 transition-colors hover:bg-gray-200">
                       {t('common.cancel', 'Cancel')}
                     </button>
                   </div>
