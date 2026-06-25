@@ -59,12 +59,38 @@ jobs:
           FUND_RELEASE_STORE_PASSWORD: *** secrets.FUNDO_RELEASE_STORE_PASSWORD }}
           FUND_RELEASE_KEY_ALIAS: ${{ secrets.FUNDO_RELEASE_KEY_ALIAS }}
           FUND_RELEASE_KEY_PASSWORD: *** secrets.FUNDO_RELEASE_KEY_PASSWORD }}
-        run: ./gradlew assembleRelease
+        run: |
+          ./gradlew assembleRelease --stacktrace > /tmp/gradle.log 2>&1 || {
+            echo "=== GRADLE BUILD FAILED ==="
+            tail -n 200 /tmp/gradle.log
+            exit 1
+          }
+
+      - name: Upload gradle log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gradle-build-log
+          path: /tmp/gradle.log
+          if-no-files-found: ignore
 
       - name: Build debug APK
         if: steps.keystore.outputs.present != 'true'
         working-directory: frontend/android
-        run: ./gradlew assembleDebug
+        run: |
+          ./gradlew assembleDebug --stacktrace > /tmp/gradle.log 2>&1 || {
+            echo "=== GRADLE BUILD FAILED ==="
+            tail -n 200 /tmp/gradle.log
+            exit 1
+          }
+
+      - name: Upload gradle log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gradle-build-log
+          path: /tmp/gradle.log
+          if-no-files-found: ignore
 
       - name: Upload release APK
         if: steps.keystore.outputs.present == 'true'
