@@ -40,7 +40,7 @@ interface TaskCompleteExtras {
 
 export function KidQuestBoard() {
   const { t } = useTranslation();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [instances, setInstances] = useState<TaskInstance[]>([]);
   const [, setRewards] = useState<Reward[]>([]);
   const [activeView, setActiveView] = useState<ViewType>('quests');
@@ -288,7 +288,7 @@ export function KidQuestBoard() {
             >
               🏰 <span className="hidden sm:inline">FunDo</span>
             </h1>
-            <div className="flex items-center gap-1 text-sm">
+            <div className="flex min-w-0 items-center gap-1 text-sm">
               <NotificationBell />
               <button onClick={handleSoundToggle} className="text-lg p-1" title={muted ? 'Unmute' : 'Mute'}>
                 {muted ? '🔇' : '🔊'}
@@ -302,6 +302,14 @@ export function KidQuestBoard() {
               <span className="bg-red-100 px-2 py-1 rounded-full font-bold text-xs">
                 🔥 {user?.current_streak || 0}
               </span>
+              <button
+                onClick={logout}
+                className="shrink-0 rounded-full bg-gray-100 px-2 py-1 text-xs font-bold text-gray-600 hover:bg-gray-200"
+                aria-label="Log out"
+                title="Log out"
+              >
+                🚪
+              </button>
             </div>
           </div>
         </div>
@@ -549,7 +557,9 @@ export function KidQuestBoard() {
                           <div className="text-xs text-red-500 mt-1">⏰ Window closed at {inst.template?.time_window_end}</div>
                         )}
                         {windowStatus === 'active' && (
-                          <div className="text-xs text-green-600 mt-1">⏰ Until {inst.template?.time_window_end}</div>
+                          <div className="text-xs text-green-600 mt-1">
+                            ⏰ Start anytime before {inst.template?.time_window_end}. Finish before it closes to keep your streak!
+                          </div>
                         )}
                       </div>
                     </div>

@@ -138,6 +138,7 @@ export function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
+  const [inviteCode, setInviteCode] = useState('');
   const [isRegister, setIsRegister] = useState(false);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -161,7 +162,7 @@ export function LoginPage() {
     setBusy(true);
     try {
       if (isRegister) {
-        await register({ username, password, display_name: displayName, role: 'parent' });
+        await register({ username, password, display_name: displayName, role: 'parent', invite_code: inviteCode || undefined });
       } else {
         await login(username, password);
       }
@@ -385,6 +386,18 @@ export function LoginPage() {
                 className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-quest-blue outline-none text-lg"
                 placeholder="The Cohen Family"
                 required
+              />
+            </div>
+          )}
+          {isRegister && (
+            <div>
+              <label className="block text-sm font-bold mb-1">🎟️ Invite Code</label>
+              <input
+                type="text"
+                value={inviteCode}
+                onChange={e => setInviteCode(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-quest-blue outline-none text-lg"
+                placeholder="Required only for private installs"
               />
             </div>
           )}

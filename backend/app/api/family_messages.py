@@ -9,6 +9,7 @@ from ..core.database import get_db
 from ..core.auth import get_current_user
 from ..models.user import User
 from ..models.family_message import FamilyMessage
+from ..services.push_notifications import notify_user
 
 router = APIRouter(prefix="/family", tags=["messages"])
 
@@ -59,6 +60,24 @@ async def send_message(
     db.add(msg)
     await db.commit()
     await db.refresh(msg)
+
+    recipients_result = await db.execute(
+        select(User).where(
+            User.family_id == current_user.family_id,
+            User.id != current_user.id,
+        )
+    )
+    for recipient in recipients_result.scalars().all():
+        await notify_user(
+            db,
+            user_id=recipient.id,
+            title="New Family Board message",
+            body=f"{current_user.display_name}: {data.message[:120]}",
+            type_="family_message",
+            link="/",
+            dedupe_window_minutes=None,
+        )
+    await db.commit()
 
     return MessageResponse(
         id=msg.id,

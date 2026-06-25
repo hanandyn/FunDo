@@ -62,6 +62,12 @@ async def register_parent(
     """Register a new parent user with their family."""
     await check_rate_limit(request, "3/minute", key="register-parent")
 
+    if settings.REGISTRATION_INVITE_ONLY:
+        expected = settings.REGISTRATION_INVITE_CODE.strip()
+        submitted = (data.invite_code or "").strip()
+        if not expected or submitted != expected:
+            raise HTTPException(status_code=403, detail="Valid invite code required")
+
     # Validate password strength
     pw_error = validate_password_strength(data.password)
     if pw_error:

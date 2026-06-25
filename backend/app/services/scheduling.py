@@ -2,13 +2,33 @@
 
 from datetime import date, datetime, timedelta, timezone
 from collections.abc import Sequence
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 from ..models.task import TaskTemplate, TaskInstance
+from ..core.config import settings
 
 
 DAY_NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+
+
+def _app_now() -> datetime:
+    try:
+        return datetime.now(ZoneInfo(settings.APP_TIMEZONE))
+    except ZoneInfoNotFoundError:
+        return datetime.now(timezone.utc)
+
+
+def _local_today() -> date:
+    return _app_now().date()
+
+
+def _time_window_expired(template: TaskTemplate) -> bool:
+    if not template.time_window_end:
+        return False
+    return _app_now().strftime("%H:%M") > template.time_window_end
 
 
 def _add_days(d: date, n: int) -> date:
@@ -121,7 +141,7 @@ async def generate_today_instances(
     Also marks yesterday's pending tasks as "missed" so they don't
     carry over to the next day.
     """
-    today = date.today()
+    today = _local_today()
     yesterday = today - timedelta(days=1)
 
     # Mark yesterday's pending tasks as missed
@@ -136,8 +156,29 @@ async def generate_today_instances(
         )
     )
     stale_instances = stale_result.scalars().all()
+    changed = 0
     for inst in stale_instances:
         inst.status = "missed"
+        changed += 1
+
+    today_start = datetime(today.year, today.month, today.day, tzinfo=timezone.utc)
+    today_end = today_start + timedelta(days=1)
+    expired_result = await db.execute(
+        select(TaskInstance)
+        .options(selectinload(TaskInstance.template))
+        .join(TaskTemplate, TaskInstance.template_id == TaskTemplate.id)
+        .where(
+            TaskInstance.status.in_(["pending", "in_progress"]),
+            TaskInstance.date >= today_start,
+            TaskInstance.date < today_end,
+            TaskInstance.child_id.in_(children_ids),
+            TaskTemplate.family_id == family_id,
+        )
+    )
+    for inst in expired_result.scalars().all():
+        if inst.template and _time_window_expired(inst.template):
+            inst.status = "missed"
+            changed += 1
 
     templates_result = await db.execute(
         select(TaskTemplate).where(
@@ -185,7 +226,7 @@ async def generate_today_instances(
             db.add(instance)
             instances.append(instance)
 
-    if instances:
+    if instances or changed:
         await db.commit()
 
     return instances

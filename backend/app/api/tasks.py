@@ -4,6 +4,7 @@ import os
 from typing import Optional
 import uuid
 from datetime import datetime, timezone, timedelta
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form, Query
 from fastapi.responses import FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -25,6 +26,7 @@ from ..services.scoring import (
     calculate_task_points, xp_for_next_level, calculate_level_from_xp,
 )
 from ..services.streaks import update_streak_on_completion
+from ..services.push_notifications import notify_user
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
@@ -80,11 +82,147 @@ def _apply_default_visuals(data: dict) -> dict:
     return data
 
 
+def _app_now() -> datetime:
+    try:
+        return datetime.now(ZoneInfo(settings.APP_TIMEZONE))
+    except ZoneInfoNotFoundError:
+        return datetime.now(timezone.utc)
+
+
+def _today_bounds_utc() -> tuple[datetime, datetime]:
+    now = _app_now()
+    start_local = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    end_local = start_local + timedelta(days=1)
+    return start_local.astimezone(timezone.utc), end_local.astimezone(timezone.utc)
+
+
+def _task_window_status(template: TaskTemplate, now: datetime | None = None) -> str:
+    """Return none/upcoming/active/expired for today's configured local time window."""
+    if not template.time_window_start and not template.time_window_end:
+        return "none"
+    current_time = (now or _app_now()).strftime("%H:%M")
+    if template.time_window_start and current_time < template.time_window_start:
+        return "upcoming"
+    if template.time_window_end and current_time > template.time_window_end:
+        return "expired"
+    return "active"
+
+
+async def _assert_task_action_allowed(db: AsyncSession, instance: TaskInstance, template: TaskTemplate) -> None:
+    if instance.status == "missed":
+        raise HTTPException(status_code=400, detail="This task was missed for today")
+    status = _task_window_status(template)
+    if status == "upcoming":
+        raise HTTPException(status_code=400, detail=f"Task opens at {template.time_window_start}")
+    if status == "expired":
+        instance.status = "missed"
+        await db.commit()
+        raise HTTPException(status_code=400, detail=f"Time window closed at {template.time_window_end}")
+
+
+async def _mark_expired_instances_missed(db: AsyncSession, family_id: int, child_ids: list[int] | None = None) -> int:
+    """Mark pending/in-progress task instances with closed windows as missed."""
+    today_start, today_end = _today_bounds_utc()
+    query = (
+        select(TaskInstance)
+        .options(selectinload(TaskInstance.template))
+        .where(
+            TaskInstance.status.in_(["pending", "in_progress"]),
+            TaskInstance.date >= today_start,
+            TaskInstance.date < today_end,
+            TaskInstance.template.has(TaskTemplate.family_id == family_id),
+        )
+    )
+    if child_ids is not None:
+        query = query.where(TaskInstance.child_id.in_(child_ids))
+
+    result = await db.execute(query)
+    instances = result.unique().scalars().all()
+    changed = 0
+    for instance in instances:
+        if instance.template and _task_window_status(instance.template) == "expired":
+            instance.status = "missed"
+            changed += 1
+    if changed:
+        await db.commit()
+    return changed
+
+
+async def _ensure_child_in_family(db: AsyncSession, child_id: int, family_id: int) -> User:
+    result = await db.execute(
+        select(User).where(User.id == child_id, User.family_id == family_id, User.role == "child")
+    )
+    child = result.scalar_one_or_none()
+    if not child:
+        raise HTTPException(status_code=404, detail="Child not found in your family")
+    return child
+
+
+async def _send_due_task_reminders(db: AsyncSession, child: User) -> None:
+    if not child.family_id:
+        return
+    today_start, today_end = _today_bounds_utc()
+    result = await db.execute(
+        select(TaskInstance)
+        .options(selectinload(TaskInstance.template))
+        .where(
+            TaskInstance.child_id == child.id,
+            TaskInstance.status == "pending",
+            TaskInstance.date >= today_start,
+            TaskInstance.date < today_end,
+        )
+    )
+    for inst in result.unique().scalars().all():
+        template = inst.template
+        if not template:
+            continue
+        status = _task_window_status(template)
+        if status == "active":
+            await notify_user(
+                db,
+                child.id,
+                "Quest time",
+                f"{template.name} is ready until {template.time_window_end or 'today'}. Keep your streak going!",
+                "task_reminder",
+                "/",
+                dedupe_window_minutes=120,
+            )
+        elif status == "upcoming" and template.time_window_start:
+            await notify_user(
+                db,
+                child.id,
+                "Quest coming up",
+                f"{template.name} opens at {template.time_window_start}. Daily quests build streaks!",
+                "task_reminder",
+                "/",
+                dedupe_window_minutes=240,
+            )
+    await db.commit()
+
+
 async def _get_family_child_ids(db: AsyncSession, family_id: int) -> list[int]:
     result = await db.execute(
         select(User.id).where(User.family_id == family_id, User.role == "child")
     )
     return list(result.scalars().all())
+
+
+async def _validate_assigned_child_ids(
+    db: AsyncSession,
+    family_id: int,
+    child_ids: list[int] | None,
+) -> list[int] | None:
+    if child_ids is None:
+        return None
+    if not child_ids:
+        return []
+    result = await db.execute(
+        select(User.id).where(User.id.in_(child_ids), User.family_id == family_id, User.role == "child")
+    )
+    valid_ids = set(result.scalars().all())
+    if valid_ids != set(child_ids):
+        raise HTTPException(status_code=400, detail="Some child IDs are invalid or not in your family")
+    return child_ids
 
 
 async def _sync_today_pending_instances(
@@ -131,7 +269,7 @@ async def create_task_template(
 ):
     """Parent creates a task template."""
     # Store assigned_kids if provided (null = all kids)
-    assigned_kids = data.assigned_child_ids
+    assigned_kids = await _validate_assigned_child_ids(db, current_user.family_id, data.assigned_child_ids)
     template_data = _apply_default_visuals(data.model_dump(exclude={"assigned_child_ids"}))
     template = TaskTemplate(
         family_id=current_user.family_id,
@@ -241,6 +379,10 @@ async def update_task_template(
         raise HTTPException(status_code=404, detail="Template not found")
 
     update_data = data.model_dump(exclude_unset=True)
+    if "assigned_kids" in update_data:
+        update_data["assigned_kids"] = await _validate_assigned_child_ids(
+            db, current_user.family_id, update_data["assigned_kids"]
+        )
     if "name" in update_data or "category" in update_data:
         merged = {
             "name": update_data.get("name", template.name),
@@ -351,16 +493,20 @@ async def get_task_instances(
     so daily/weekly/monthly tasks appear automatically each day.
     """
     if current_user.role == "parent":
+        await _mark_expired_instances_missed(db, current_user.family_id)
         query = select(TaskInstance).options(selectinload(TaskInstance.template)).where(
             TaskInstance.template.has(TaskTemplate.family_id == current_user.family_id)
         )
         if child_id:
+            await _ensure_child_in_family(db, child_id, current_user.family_id)
             query = query.where(TaskInstance.child_id == child_id)
     else:
         # Regenerate today's recurring instances before loading
         if current_user.family_id:
             from ..services.scheduling import generate_today_instances
             await generate_today_instances(db, current_user.family_id, [current_user.id])
+            await _mark_expired_instances_missed(db, current_user.family_id, [current_user.id])
+            await _send_due_task_reminders(db, current_user)
         query = select(TaskInstance).options(selectinload(TaskInstance.template)).where(
             TaskInstance.child_id == current_user.id
         )
@@ -383,19 +529,16 @@ async def start_timer(
         raise HTTPException(status_code=404, detail="Task instance not found")
     if current_user.role == "child" and instance.child_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not your task")
+    if current_user.role == "parent":
+        await _ensure_child_in_family(db, instance.child_id, current_user.family_id)
 
     # Check time window if set
     template = await db.execute(
         select(TaskTemplate).where(TaskTemplate.id == instance.template_id)
     )
     template_obj = template.scalar_one_or_none()
-    if template_obj and (template_obj.time_window_start or template_obj.time_window_end):
-        now = datetime.now(timezone.utc)
-        current_time = now.strftime("%H:%M")
-        if template_obj.time_window_start and current_time < template_obj.time_window_start:
-            raise HTTPException(status_code=400, detail=f"Task opens at {template_obj.time_window_start}")
-        if template_obj.time_window_end and current_time > template_obj.time_window_end:
-            raise HTTPException(status_code=400, detail=f"Time window closed at {template_obj.time_window_end}")
+    if template_obj:
+        await _assert_task_action_allowed(db, instance, template_obj)
 
     instance.status = "in_progress"
     instance.timer_started_at = datetime.now(timezone.utc)
@@ -422,16 +565,13 @@ async def complete_task(
         raise HTTPException(status_code=404, detail="Task instance not found")
     if current_user.role == "child" and instance.child_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not your task")
+    if current_user.role == "parent":
+        await _ensure_child_in_family(db, instance.child_id, current_user.family_id)
 
-    # Check time window for non-timed tasks (timed tasks already checked at start)
+    # Tasks must be completed before the end of their daily window.
     template = instance.template
-    if template and (template.time_window_start or template.time_window_end):
-        now = datetime.now(timezone.utc)
-        current_time = now.strftime("%H:%M")
-        if template.time_window_start and current_time < template.time_window_start:
-            raise HTTPException(status_code=400, detail=f"Task opens at {template.time_window_start}")
-        if template.time_window_end and current_time > template.time_window_end:
-            raise HTTPException(status_code=400, detail=f"Time window closed at {template.time_window_end}")
+    if template:
+        await _assert_task_action_allowed(db, instance, template)
 
     # Get the child user for stats
     child_result = await db.execute(select(User).where(User.id == instance.child_id))
@@ -564,6 +704,8 @@ async def undo_task_completion(
         raise HTTPException(status_code=404, detail="Task instance not found")
     if current_user.role == "child" and instance.child_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not your task")
+    if current_user.role == "parent":
+        await _ensure_child_in_family(db, instance.child_id, current_user.family_id)
     if instance.status != "completed":
         raise HTTPException(status_code=400, detail="Can only undo completed tasks")
 
@@ -780,6 +922,7 @@ async def get_all_family_instances(
         .where(TaskInstance.template.has(TaskTemplate.family_id == current_user.family_id))
     )
     if child_id:
+        await _ensure_child_in_family(db, child_id, current_user.family_id)
         query = query.where(TaskInstance.child_id == child_id)
     if status:
         query = query.where(TaskInstance.status == status)
@@ -797,6 +940,10 @@ async def increment_ask_count(
     instance = result.scalar_one_or_none()
     if not instance:
         raise HTTPException(status_code=404, detail="Task instance not found")
+    template_result = await db.execute(select(TaskTemplate).where(TaskTemplate.id == instance.template_id))
+    template = template_result.scalar_one_or_none()
+    if not template or template.family_id != current_user.family_id:
+        raise HTTPException(status_code=403, detail="Not in your family")
 
     instance.asks_count = (instance.asks_count or 0) + 1
     await db.commit()
@@ -811,6 +958,11 @@ async def get_child_stats(
 ):
     """Get statistics for a child."""
     from ..services.leaderboard import get_child_all_time_stats, get_child_weekly_stats
+    if current_user.role == "child":
+        if current_user.id != child_id:
+            raise HTTPException(status_code=403, detail="Access denied")
+    else:
+        await _ensure_child_in_family(db, child_id, current_user.family_id)
     
     all_time = await get_child_all_time_stats(db, child_id)
     weekly = await get_child_weekly_stats(db, child_id)
@@ -837,6 +989,8 @@ async def upload_task_photo(
         raise HTTPException(status_code=404, detail="Task instance not found")
     if current_user.role == "child" and instance.child_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not your task")
+    if current_user.role == "parent" and instance.template.family_id != current_user.family_id:
+        raise HTTPException(status_code=403, detail="Not in your family")
 
     # Validate file type
     allowed_types = {"image/jpeg", "image/png", "image/webp", "image/gif"}

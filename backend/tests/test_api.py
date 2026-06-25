@@ -77,6 +77,32 @@ class TestAuth:
         finally:
             await client.aclose()
 
+    async def test_register_parent_requires_invite_when_enabled(self, monkeypatch):
+        from app.core.config import settings
+
+        monkeypatch.setattr(settings, "REGISTRATION_INVITE_ONLY", True)
+        monkeypatch.setattr(settings, "REGISTRATION_INVITE_CODE", "family-only")
+        client = make_client()
+        try:
+            blocked = await client.post("/api/v1/auth/register-parent", json={
+                "username": "inviteblocked",
+                "display_name": "Invite Blocked",
+                "password": "Secret123",
+                "role": "parent",
+            })
+            assert blocked.status_code == 403
+
+            allowed = await client.post("/api/v1/auth/register-parent", json={
+                "username": "inviteok",
+                "display_name": "Invite OK",
+                "password": "Secret123",
+                "role": "parent",
+                "invite_code": "family-only",
+            })
+            assert allowed.status_code == 200
+        finally:
+            await client.aclose()
+
     async def test_login(self):
         client = make_client()
         try:
@@ -164,6 +190,79 @@ class TestTasks:
             }, headers={"Authorization": f"Bearer {token}"})
             assert resp.status_code == 200
             assert resp.json()["name"] == "Shower Time"
+        finally:
+            await client.aclose()
+
+    async def test_parent_cannot_access_other_family_child_stats(self):
+        client = make_client()
+        try:
+            p1 = await client.post("/api/v1/auth/register-parent", json={
+                "username": "family1parent",
+                "display_name": "Family One",
+                "password": "Secret123",
+                "role": "parent",
+            })
+            p2 = await client.post("/api/v1/auth/register-parent", json={
+                "username": "family2parent",
+                "display_name": "Family Two",
+                "password": "Secret123",
+                "role": "parent",
+            })
+            h1 = {"Authorization": f"Bearer {p1.json()['access_token']}"}
+            h2 = {"Authorization": f"Bearer {p2.json()['access_token']}"}
+            child = await client.post("/api/v1/auth/create-child", json={
+                "username": "family1kid",
+                "display_name": "Family One Kid",
+                "password": "KidPass1",
+                "role": "child",
+                "age_tier": 3,
+            }, headers=h1)
+            child_id = child.json()["id"]
+
+            stats = await client.get(f"/api/v1/tasks/children/{child_id}/stats", headers=h2)
+            streak = await client.get(f"/api/v1/leaderboard/child/{child_id}/streak", headers=h2)
+            achievements = await client.get(f"/api/v1/achievements/child/{child_id}", headers=h2)
+
+            assert stats.status_code in {403, 404}
+            assert streak.status_code in {403, 404}
+            assert achievements.status_code in {403, 404}
+        finally:
+            await client.aclose()
+
+    async def test_expired_time_window_task_is_marked_missed_for_child(self):
+        client = make_client()
+        try:
+            reg = await client.post("/api/v1/auth/register-parent", json={
+                "username": "windowparent",
+                "display_name": "Window Parent",
+                "password": "Secret123",
+                "role": "parent",
+            })
+            parent_headers = {"Authorization": f"Bearer {reg.json()['access_token']}"}
+            await client.post("/api/v1/auth/create-child", json={
+                "username": "windowkid",
+                "display_name": "Window Kid",
+                "password": "KidPass1",
+                "role": "child",
+                "age_tier": 3,
+            }, headers=parent_headers)
+            await client.post("/api/v1/tasks/templates", json={
+                "name": "Early Window",
+                "task_type": "one_shot",
+                "base_points": 10,
+                "schedule_type": "daily",
+                "time_window_start": "00:00",
+                "time_window_end": "00:00",
+            }, headers=parent_headers)
+            login = await client.post("/api/v1/auth/login", json={
+                "username": "windowkid",
+                "password": "KidPass1",
+            })
+            child_headers = {"Authorization": f"Bearer {login.json()['access_token']}"}
+            tasks = await client.get("/api/v1/tasks/instances", headers=child_headers)
+
+            assert tasks.status_code == 200
+            assert any(task["status"] == "missed" for task in tasks.json())
         finally:
             await client.aclose()
 

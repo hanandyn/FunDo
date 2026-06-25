@@ -178,8 +178,13 @@ export function YoungAdultDashboard() {
               <span className="text-slate-400">{user?.gems ?? 0}<span className="text-slate-600 ml-0.5">💎</span></span>
               <span className="text-slate-500">Lv.{user?.level}</span>
             </div>
-            <button onClick={logout} className="text-slate-600 hover:text-slate-400 transition-colors text-sm" title="Sign out">
-              ⏻
+            <button
+              onClick={logout}
+              className="shrink-0 rounded-lg bg-slate-900 px-2.5 py-1.5 text-xs font-semibold text-slate-300 transition-colors hover:bg-slate-800"
+              title="Sign out"
+              aria-label="Log out"
+            >
+              ⏻ <span className="hidden sm:inline">Logout</span>
             </button>
           </div>
         </div>

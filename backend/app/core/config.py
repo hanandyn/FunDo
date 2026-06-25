@@ -1,7 +1,6 @@
 """Application configuration via environment variables."""
 
 from pydantic_settings import BaseSettings
-from typing import Optional
 
 
 class Settings(BaseSettings):
@@ -46,6 +45,12 @@ class Settings(BaseSettings):
     SMTP_FROM: str = "noreply@fundo.local"
     SMTP_USE_TLS: bool = True
     BASE_URL: str = "http://localhost:5173"
+    APP_TIMEZONE: str = "Asia/Jerusalem"
+
+    # Optional closed registration. When enabled, parent registration requires
+    # REGISTRATION_INVITE_CODE to match the submitted invite_code.
+    REGISTRATION_INVITE_ONLY: bool = False
+    REGISTRATION_INVITE_CODE: str = ""
 
     # Browser push notifications. Set VAPID_PUBLIC_KEY/PRIVATE_KEY in production
     # to enable real device subscriptions.

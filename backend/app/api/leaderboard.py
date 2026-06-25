@@ -69,5 +69,10 @@ async def get_child_streak(
     child = child_result.scalar_one_or_none()
     if not child:
         raise HTTPException(status_code=404, detail="Child not found")
+    if current_user.role == "child":
+        if current_user.id != child_id:
+            raise HTTPException(status_code=403, detail="Access denied")
+    elif child.family_id != current_user.family_id:
+        raise HTTPException(status_code=404, detail="Child not found")
     
     return await get_streak_info(db, child)

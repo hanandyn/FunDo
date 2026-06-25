@@ -619,14 +619,17 @@ export function ParentDashboard() {
                     {/* Time window */}
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="text-xs text-gray-500">Time Window Start (optional)</label>
+                        <label className="text-xs text-gray-500">Can start after (optional)</label>
                         <input type="time" value={timeWindowStart} onChange={e => setTimeWindowStart(e.target.value)} className="w-full px-3 py-2 rounded-xl border-2 border-gray-200" />
                       </div>
                       <div>
-                        <label className="text-xs text-gray-500">Time Window End (optional)</label>
+                        <label className="text-xs text-gray-500">Must finish by (optional)</label>
                         <input type="time" value={timeWindowEnd} onChange={e => setTimeWindowEnd(e.target.value)} className="w-full px-3 py-2 rounded-xl border-2 border-gray-200" />
                       </div>
                     </div>
+                    <p className="text-xs text-gray-500">
+                      Kids can start anytime in this window. If the window closes before they finish, it is missed for the day.
+                    </p>
                     {/* Assign to specific kids */}
                     <div>
                       <label className="text-xs text-gray-500 mb-1 block">Assign to (default: all kids)</label>
@@ -722,14 +725,17 @@ export function ParentDashboard() {
                     {/* Time window */}
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="text-xs text-gray-500">Time Window Start (optional)</label>
+                        <label className="text-xs text-gray-500">Can start after (optional)</label>
                         <input type="time" value={timeWindowStart} onChange={e => setTimeWindowStart(e.target.value)} className="w-full px-3 py-2 rounded-xl border-2 border-gray-200" />
                       </div>
                       <div>
-                        <label className="text-xs text-gray-500">Time Window End (optional)</label>
+                        <label className="text-xs text-gray-500">Must finish by (optional)</label>
                         <input type="time" value={timeWindowEnd} onChange={e => setTimeWindowEnd(e.target.value)} className="w-full px-3 py-2 rounded-xl border-2 border-gray-200" />
                       </div>
                     </div>
+                    <p className="text-xs text-gray-500">
+                      Kids can start anytime in this window. If the window closes before they finish, it is missed for the day.
+                    </p>
                     <div>
                       <label className="text-xs text-gray-500 mb-1 block">Assign to (empty = all kids)</label>
                       <div className="flex flex-wrap gap-2">

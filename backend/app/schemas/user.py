@@ -16,6 +16,7 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     password: str
     email: Optional[str] = None
+    invite_code: Optional[str] = None
 
 
 class UserLogin(BaseModel):

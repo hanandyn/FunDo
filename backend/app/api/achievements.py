@@ -5,6 +5,7 @@ import random
 from datetime import datetime, timezone, date
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
 from ..core.database import get_db
 from ..core.auth import get_current_user
@@ -41,6 +42,12 @@ async def get_child_achievements_route(
     """Get a child's earned achievements plus all locked ones."""
     if current_user.role == "child" and current_user.id != child_id:
         raise HTTPException(status_code=403, detail="Access denied")
+    if current_user.role == "parent":
+        child_result = await db.execute(
+            select(User).where(User.id == child_id, User.family_id == current_user.family_id, User.role == "child")
+        )
+        if not child_result.scalar_one_or_none():
+            raise HTTPException(status_code=404, detail="Child not found")
     return await get_child_achievements(db, child_id)
 
 

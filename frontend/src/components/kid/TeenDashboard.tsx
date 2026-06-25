@@ -151,7 +151,13 @@ export function TeenDashboard() {
                 <span>💎</span> {user?.gems}
               </span>
             </div>
-            <button onClick={logout} className="text-gray-500 hover:text-gray-300 p-1">🚪</button>
+            <button
+              onClick={logout}
+              className="shrink-0 rounded-lg bg-gray-800 px-2.5 py-1.5 text-xs font-semibold text-gray-300 hover:bg-gray-700"
+              aria-label="Log out"
+            >
+              🚪 <span className="hidden sm:inline">Logout</span>
+            </button>
           </div>
         </div>
       </header>

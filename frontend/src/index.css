@@ -187,6 +187,30 @@ span {
   max-width: 100%;
 }
 
+@media (min-width: 1024px) {
+  .btn-quest {
+    padding: 0.625rem 1.125rem;
+    border-radius: 0.875rem;
+    font-size: 1rem;
+  }
+
+  .card-quest,
+  .card-kid {
+    border-radius: 1rem;
+    padding: 1.25rem;
+  }
+
+  .card-quest h1,
+  .card-kid h1 {
+    font-size: 2.25rem;
+  }
+
+  .card-quest h2,
+  .card-kid h2 {
+    font-size: 1.875rem;
+  }
+}
+
 @media (max-width: 480px) {
   .btn-quest {
     width: 100%;

@@ -18,28 +18,31 @@ export function FamilyMessageBoard() {
   const loadMessages = useCallback(async () => {
     try {
       const data = await api.getFamilyMessages(30) as unknown as FamilyMessage[];
-      setMessages(data);
+      setMessages([...data].reverse());
     } catch { /* no messages yet */ }
   }, []);
 
   useEffect(() => {
-    (async () => {
-      try {
-        const data = await api.getFamilyMessages(30) as unknown as FamilyMessage[];
-        setMessages(data);
-      } catch { /* no messages yet */ }
-    })();
-    const interval = setInterval(() => { loadMessages(); }, 60000);
-    return () => clearInterval(interval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    const firstLoad = window.setTimeout(() => { void loadMessages(); }, 0);
+    const interval = setInterval(() => { void loadMessages(); }, 3000);
+    const handleFocus = () => { void loadMessages(); };
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleFocus);
+    return () => {
+      clearInterval(interval);
+      window.clearTimeout(firstLoad);
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleFocus);
+    };
+  }, [loadMessages]);
 
   const handleSend = async () => {
     if (!newMessage.trim()) return;
     setSending(true);
     try {
       const msgType = user?.role === 'parent' ? 'announcement' : 'cheer';
-      await api.sendFamilyMessage({ message: newMessage.trim(), type: msgType });
+      const sent = await api.sendFamilyMessage({ message: newMessage.trim(), type: msgType }) as unknown as FamilyMessage;
+      setMessages(prev => [...prev.filter(msg => msg.id !== sent.id), sent]);
       setNewMessage('');
       await loadMessages();
     } catch (e) {
