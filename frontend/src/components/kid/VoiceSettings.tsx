@@ -13,7 +13,12 @@ import type { VoiceSettings } from './useVoicePrompt';
  * - Test with a sample message
  * - Record custom voice prompts (parent's voice for their child)
  */
-export function VoiceSettings() {
+type VoiceSettingsProps = {
+  compact?: boolean;
+  panelAlign?: 'left' | 'right';
+};
+
+export function VoiceSettings({ compact = false, panelAlign = 'right' }: VoiceSettingsProps) {
   const { t } = useTranslation();
   const { settings, toggleVoice, updateSettings, setCustomPrompt, recordCustomPrompt } = useVoicePrompt();
   const [showSettings, setShowSettings] = useState(false);
@@ -75,10 +80,10 @@ export function VoiceSettings() {
       {/* Toggle button — large and friendly for Tier 1 */}
       <button
         onClick={() => setShowSettings(!showSettings)}
-        className="w-14 h-14 rounded-full flex items-center justify-center text-xl
+        className={`${compact ? 'h-11 w-11 text-lg' : 'h-14 w-14 text-xl'} flex items-center justify-center rounded-full
                    transition-all duration-300 shadow-md
                    hover:scale-110 active:scale-95
-                   focus:outline-none focus:ring-4 focus:ring-yellow-300"
+                   focus:outline-none focus:ring-4 focus:ring-yellow-300`}
         style={{
           background: settings.enabled
             ? 'linear-gradient(135deg, #fbbf24, #f59e0b)'
@@ -97,7 +102,7 @@ export function VoiceSettings() {
             initial={{ opacity: 0, scale: 0.9, y: -10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: -10 }}
-            className="absolute top-16 right-0 z-50 w-72 bg-white rounded-2xl shadow-2xl border border-gray-100 p-4"
+            className={`absolute top-14 z-50 w-[min(18rem,calc(100vw-2rem))] rounded-2xl border border-gray-100 bg-white p-4 shadow-2xl ${panelAlign === 'left' ? 'left-0' : 'right-0'}`}
           >
             <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
               🎙️ {t('voice.title')}

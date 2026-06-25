@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../../contexts/AuthContext';
 
 const COOKIE_CONSENT_KEY = 'fundo_cookie_consent';
 
@@ -11,6 +12,7 @@ const COOKIE_CONSENT_KEY = 'fundo_cookie_consent';
  */
 export function CookieConsentBanner() {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [visible, setVisible] = useState(() => !localStorage.getItem(COOKIE_CONSENT_KEY));
 
   const accept = () => {
@@ -20,7 +22,7 @@ export function CookieConsentBanner() {
 
   return (
     <AnimatePresence>
-      {visible && (
+      {visible && user?.role !== 'child' && (
         <motion.div
           initial={{ y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}

@@ -84,11 +84,13 @@ h2,
 h3,
 h4,
 h5,
-h6,
-button,
-a,
-span {
+h6 {
   overflow-wrap: anywhere;
+}
+
+.break-anywhere {
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .safe-bottom {

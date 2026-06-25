@@ -120,13 +120,13 @@ export function LittleExplorerDashboard() {
 
   return (
     <div
-      className="min-h-screen relative overflow-hidden select-none"
+      className="little-explorer-screen relative min-h-screen min-h-[100dvh] overflow-x-clip select-none"
       style={{
         background: `linear-gradient(180deg, ${colors.sky} 0%, ${colors.sky} 55%, ${colors.grass} 55%, ${colors.grass} 100%)`,
       }}
     >
       {/* Animated stars in sky */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[58dvh] max-h-[420px] overflow-hidden">
         {stars.map(s => (
           <motion.div
             key={s.id}
@@ -146,14 +146,14 @@ export function LittleExplorerDashboard() {
 
       {/* Clouds */}
       <motion.div
-        className="absolute top-8 text-6xl opacity-40"
+        className="pointer-events-none absolute top-12 left-0 text-5xl opacity-40 sm:top-8 sm:text-6xl"
         animate={{ x: [0, 20, 0] }}
         transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
       >
         ☁️
       </motion.div>
       <motion.div
-        className="absolute top-20 right-12 text-5xl opacity-30"
+        className="pointer-events-none absolute top-24 right-2 text-4xl opacity-30 sm:right-12 sm:text-5xl"
         animate={{ x: [0, -15, 0] }}
         transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut' }}
       >
@@ -161,14 +161,14 @@ export function LittleExplorerDashboard() {
       </motion.div>
 
       {/* Ground elements — flowers that bloom based on tasks */}
-      <div className="absolute bottom-0 left-0 right-0 h-[45%] pointer-events-none">
+      <div className="pointer-events-none absolute right-0 bottom-0 left-0 h-[45%] overflow-hidden">
         {/* Grass blades */}
         {Array.from({ length: 12 }, (_, i) => (
           <motion.div
             key={`grass-${i}`}
             className="absolute bottom-0 text-2xl"
             style={{
-              left: `${5 + i * 8}%`,
+              left: `calc(${5 + i * 8}% - 12px)`,
               transformOrigin: 'bottom center',
             }}
             animate={{
@@ -202,36 +202,46 @@ export function LittleExplorerDashboard() {
       </div>
 
       {/* Header */}
-      <header className="relative z-10 flex items-center justify-between px-6 py-4">
-        <div className="flex items-center gap-3">
-          <motion.div
-            className="text-5xl"
-            animate={{ y: [0, -5, 0], rotate: [0, 3, 0, -3, 0] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          >
-            {pet?.emoji || '🥚'}
-          </motion.div>
-          <div className="flex flex-col">
-            <span className="text-2xl font-bold text-white drop-shadow-md">
-              {user?.display_name}
-            </span>
-            {pet && (
-              <span className="text-sm text-white/70 drop-shadow">
-                {pet.emoji} Level {petState?.stats.level} • {pet.stage}
+      <header className="safe-top relative z-10 mx-auto flex w-full max-w-[480px] flex-col gap-3 px-3 py-3 sm:max-w-[520px] sm:px-5">
+        <div className="flex min-w-0 items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <motion.div
+              className="shrink-0 text-4xl sm:text-5xl"
+              animate={{ y: [0, -5, 0], rotate: [0, 3, 0, -3, 0] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              {pet?.emoji || '🥚'}
+            </motion.div>
+            <div className="flex min-w-0 flex-col">
+              <span className="truncate whitespace-nowrap text-xl font-bold text-white drop-shadow-md sm:text-2xl">
+                {user?.display_name}
               </span>
-            )}
+              {pet && (
+                <span className="truncate whitespace-nowrap text-xs text-white/80 drop-shadow sm:text-sm">
+                  {pet.emoji} Level {petState?.stats.level} • {pet.stage}
+                </span>
+              )}
+            </div>
           </div>
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => { speak('Bye bye!', 'greeting'); logout(); }}
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/15 text-xl text-white shadow-lg backdrop-blur hover:bg-white/25"
+            aria-label="Log out"
+          >
+            🚪
+          </motion.button>
         </div>
-        <div className="flex items-center gap-3">
-          <VoiceSettings />
+        <div className="grid min-w-0 grid-cols-[44px_minmax(72px,1fr)_auto] items-center gap-2">
+          <VoiceSettings compact panelAlign="left" />
           {/* Stars Jar visual */}
           <motion.div
-            className="flex items-center gap-1 bg-white/20 backdrop-blur rounded-full px-4 py-2"
+            className="flex h-11 min-w-0 items-center justify-center gap-1 whitespace-nowrap rounded-full bg-white/20 px-3 py-2 backdrop-blur"
             whileTap={{ scale: 0.95 }}
             onClick={() => speak(`You have ${user?.stars || 0} stars and ${user?.gems || 0} gems!`, 'encouragement')}
           >
-            <span className="text-2xl">⭐</span>
-            <span className="text-xl font-bold text-white">{user?.stars}</span>
+            <span className="text-xl">⭐</span>
+            <span className="text-lg font-bold text-white">{user?.stars}</span>
           </motion.div>
           <motion.button
             whileTap={{ scale: 0.92 }}
@@ -239,25 +249,17 @@ export function LittleExplorerDashboard() {
               audio.playButtonClick();
               setShowRewardShop(true);
             }}
-            className="flex items-center gap-2 bg-white/25 hover:bg-white/35 text-white rounded-full px-4 py-2 backdrop-blur border border-white/25 shadow-lg"
+            className="flex h-11 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-white/25 bg-white/25 px-3 py-2 text-white shadow-lg backdrop-blur hover:bg-white/35 sm:gap-2 sm:px-4"
             aria-label="Open reward shop"
           >
-            <span className="text-2xl">🎁</span>
-            <span className="text-xl font-bold drop-shadow">Shop</span>
-          </motion.button>
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            onClick={() => { speak('Bye bye!', 'greeting'); logout(); }}
-            className="bg-white/10 hover:bg-white/20 text-white text-2xl rounded-full w-12 h-12 flex items-center justify-center backdrop-blur"
-            aria-label="Log out"
-          >
-            🚪
+            <span className="text-xl">🎁</span>
+            <span className="text-lg font-bold drop-shadow">Shop</span>
           </motion.button>
         </div>
       </header>
 
       {/* Pet area — center */}
-      <div className="relative z-10 flex flex-col items-center mt-6 mb-8">
+      <div className="relative z-10 mx-auto flex w-full max-w-[480px] flex-col items-center px-3 pt-2 pb-6 sm:max-w-[520px] sm:px-4 sm:pt-6 sm:pb-8">
         {/* Pet character */}
         <motion.div
           className="relative cursor-pointer"
@@ -276,7 +278,7 @@ export function LittleExplorerDashboard() {
         >
           {/* Pet emoji */}
           <motion.div
-            className="text-8xl"
+            className="text-7xl sm:text-8xl"
             animate={{
               scale: [1, 1.05, 1],
               y: [0, -8, 0],
@@ -307,11 +309,11 @@ export function LittleExplorerDashboard() {
               {[0, 60, 120, 180, 240, 300].map((angle, i) => (
                 <motion.div
                   key={`sparkle-${i}`}
-                  className="absolute text-lg"
+                  className="absolute text-base sm:text-lg"
                   style={{
                     top: '50%',
                     left: '50%',
-                    transform: `rotate(${angle}deg) translateY(-60px)`,
+                    transform: `rotate(${angle}deg) translateY(-52px)`,
                   }}
                   animate={{ opacity: [0, 1, 0], scale: [0, 1, 0] }}
                   transition={{ duration: 2, delay: i * 0.3, repeat: Infinity }}
@@ -325,11 +327,11 @@ export function LittleExplorerDashboard() {
 
         {/* Pet name/mood */}
         <motion.div
-          className="mt-3 bg-white/20 backdrop-blur rounded-2xl px-6 py-2 text-white text-center"
+          className="mt-3 max-w-full rounded-2xl bg-white/20 px-5 py-2 text-center text-white backdrop-blur"
           animate={{ y: [0, -3, 0] }}
           transition={{ duration: 2, repeat: Infinity }}
         >
-          <div className="text-lg font-bold capitalize">{pet?.mood || 'sleeping'} {pet?.stage || 'egg'}</div>
+          <div className="truncate whitespace-nowrap text-lg font-bold capitalize">{pet?.mood || 'sleeping'} {pet?.stage || 'egg'}</div>
         </motion.div>
 
         {/* Progress tree */}
@@ -350,7 +352,7 @@ export function LittleExplorerDashboard() {
       </div>
 
       {/* Tasks area — character bubbles */}
-      <div className="relative z-10 px-4 pb-8">
+      <div className="relative z-10 mx-auto w-full max-w-[480px] px-3 pb-6 sm:max-w-[520px] sm:px-4 sm:pb-8">
         <AnimatePresence mode="wait">
           {tasks.length === 0 ? (
             <motion.div
@@ -370,7 +372,7 @@ export function LittleExplorerDashboard() {
               </p>
             </motion.div>
           ) : (
-            <div className="flex flex-wrap gap-4 justify-center">
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(136px,1fr))] gap-3 sm:grid-cols-2 sm:gap-4">
               {tasks.map((task, i) => (
                 <motion.button
                   key={task.id}
@@ -386,9 +388,8 @@ export function LittleExplorerDashboard() {
                   }}
                   disabled={completingId !== null}
                   className={`
-                    relative flex flex-col items-center gap-2 p-5 rounded-3xl
+                    relative flex min-h-[144px] min-w-0 flex-col items-center justify-center gap-2 rounded-3xl p-3 sm:min-h-[156px] sm:gap-3 sm:p-4
                     bg-white/25 backdrop-blur border-2 border-white/30
-                    min-w-[120px] min-h-[120px]
                     transition-all shadow-lg
                     ${completingId === task.id ? 'animate-pulse border-yellow-300' : 'hover:bg-white/35 hover:border-white/50'}
                     ${completingId !== null && completingId !== task.id ? 'opacity-50' : ''}
@@ -403,11 +404,16 @@ export function LittleExplorerDashboard() {
                     }}
                     transition={{ duration: 2, delay: i * 0.2, repeat: Infinity }}
                   >
-                    <TaskVisual icon={task.icon} imageUrl={task.image_url} size="xl" className="bg-white/90" />
+                    <TaskVisual
+                      icon={task.icon}
+                      imageUrl={task.image_url}
+                      visualClassName="h-20 w-20 rounded-3xl p-2 text-5xl sm:h-24 sm:w-24 sm:p-2.5 sm:text-6xl"
+                      className="bg-white/90"
+                    />
                   </motion.div>
 
                   {/* Points badge */}
-                  <span className="text-lg font-bold text-white bg-yellow-400/40 rounded-full px-3 py-1">
+                  <span className="whitespace-nowrap rounded-full bg-yellow-400/40 px-3 py-1 text-base font-bold text-white sm:text-lg">
                     ⭐{task.points}
                   </span>
 
@@ -436,7 +442,7 @@ export function LittleExplorerDashboard() {
 
       {/* Sticker book preview */}
       {petState && petState.stickers.length > 0 && (
-        <div className="relative z-10 px-6 pb-8">
+        <div className="relative z-10 mx-auto w-full max-w-[480px] px-3 pb-6 sm:max-w-[520px] sm:px-4 sm:pb-8">
           <div className="bg-white/15 backdrop-blur rounded-3xl p-4">
             <div className="flex items-center gap-2 mb-3">
               <span className="text-3xl">📖</span>
@@ -464,16 +470,16 @@ export function LittleExplorerDashboard() {
       )}
 
       {/* Stars jar visualization */}
-      <div className="relative z-10 px-6 pb-8">
+      <div className="relative z-10 mx-auto w-full max-w-[480px] px-3 pb-6 sm:max-w-[520px] sm:px-4 sm:pb-8">
         <motion.div
           className="bg-white/15 backdrop-blur rounded-3xl p-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
           <div className="flex items-center gap-3">
-            <span className="text-4xl">🏺</span>
-            <div className="flex-1">
-              <div className="text-white font-bold text-lg mb-1">Star Jar</div>
+            <span className="shrink-0 text-4xl">🏺</span>
+            <div className="min-w-0 flex-1">
+              <div className="mb-1 truncate whitespace-nowrap text-lg font-bold text-white">Star Jar</div>
               <div className="h-6 bg-white/20 rounded-full overflow-hidden">
                 <motion.div
                   className="h-full bg-yellow-400 rounded-full"
@@ -482,7 +488,7 @@ export function LittleExplorerDashboard() {
                 />
               </div>
             </div>
-            <span className="text-white font-bold text-xl">{(petState?.stats.stars || 0)}⭐</span>
+            <span className="shrink-0 whitespace-nowrap text-xl font-bold text-white">{(petState?.stats.stars || 0)}⭐</span>
           </div>
           <motion.button
             whileTap={{ scale: 0.96 }}
@@ -490,7 +496,7 @@ export function LittleExplorerDashboard() {
               audio.playButtonClick();
               setShowRewardShop(true);
             }}
-            className="mt-4 w-full min-h-[64px] rounded-3xl bg-white/25 hover:bg-white/35 border-2 border-white/30 text-white font-bold text-2xl shadow-lg"
+            className="mt-4 min-h-[64px] w-full rounded-3xl border-2 border-white/30 bg-white/25 text-xl font-bold text-white shadow-lg hover:bg-white/35 sm:text-2xl"
             aria-label="Open reward shop"
           >
             🎁 Reward Shop
@@ -544,8 +550,8 @@ export function LittleExplorerDashboard() {
       </AnimatePresence>
 
       {/* Family Message Board */}
-      <div className="max-w-2xl mx-auto px-4 pb-6">
-        <FamilyMessageBoard />
+      <div className="safe-bottom relative z-10 mx-auto w-full max-w-[480px] px-3 pb-6 sm:max-w-[520px] sm:px-4">
+        <FamilyMessageBoard compact />
       </div>
 
       <AnimatePresence>

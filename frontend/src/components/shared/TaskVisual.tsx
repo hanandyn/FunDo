@@ -6,6 +6,7 @@ type TaskVisualProps = {
   icon?: string;
   imageUrl?: string;
   size?: 'sm' | 'md' | 'lg' | 'xl';
+  visualClassName?: string;
   className?: string;
 };
 
@@ -16,13 +17,13 @@ const SIZE_CLASSES = {
   xl: 'w-24 h-24 rounded-3xl text-6xl p-2.5',
 };
 
-export function TaskVisual({ template, icon, imageUrl, size = 'md', className = '' }: TaskVisualProps) {
+export function TaskVisual({ template, icon, imageUrl, size = 'md', visualClassName, className = '' }: TaskVisualProps) {
   const inferred = inferTaskVisual(template?.name, template?.category);
   const finalIcon = icon || template?.icon || inferred.icon;
   const finalImage = imageUrl || template?.image_url || inferred.imageUrl;
 
   return (
-    <div className={`flex items-center justify-center bg-white/80 overflow-hidden shadow-sm ${SIZE_CLASSES[size]} ${className}`}>
+    <div className={`flex items-center justify-center bg-white/80 overflow-hidden shadow-sm ${visualClassName || SIZE_CLASSES[size]} ${className}`}>
       {finalImage ? (
         <img
           src={finalImage}

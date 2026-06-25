@@ -58,7 +58,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     <ToastContext.Provider value={{ addToast, removeToast }}>
       {children}
       {/* Phase 9: Toast container with stacking */}
-      <div className="fixed top-4 right-4 z-50 flex flex-col-reverse gap-2 max-w-sm w-full pointer-events-none" role="region" aria-label="Notifications">
+      <div className="pointer-events-none fixed top-4 right-4 left-4 z-50 flex w-auto max-w-sm flex-col-reverse gap-2 sm:left-auto sm:w-full" role="region" aria-label="Notifications">
         <AnimatePresence>
           {toasts.map(toast => {
             const style = typeStyles[toast.type] || typeStyles.info;
