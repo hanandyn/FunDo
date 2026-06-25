@@ -1,6 +1,8 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../../lib/api';
+import { useTranslation } from 'react-i18next';
+import { KidSettings } from './KidSettings';
 import { useAuth } from '../../contexts/AuthContext';
 import type { TaskInstance, KidRecap, AllowanceStatus, WeeklyRecap } from '../../lib/types';
 import { CountdownTimer } from '../timer/CountdownTimer';
@@ -23,12 +25,14 @@ type ViewType = 'today' | 'habits' | 'money' | 'goals' | 'insights' | 'shop';
  * - Calendar sync
  */
 export function YoungAdultDashboard() {
+  const { t } = useTranslation();
   const { user, logout } = useAuth();
   const [instances, setInstances] = useState<TaskInstance[]>([]);
   const [recap, setRecap] = useState<KidRecap | null>(null);
   const [weeklyRecap, setWeeklyRecap] = useState<WeeklyRecap | null>(null);
   const [allowance, setAllowance] = useState<AllowanceStatus | null>(null);
   const [activeView, setActiveView] = useState<ViewType>('today');
+  const [showSettings, setShowSettings] = useState(false);
   const [activeTimer, setActiveTimer] = useState<TaskInstance | null>(null);
   const [toast, setToast] = useState('');
   const [pullRefreshing, setPullRefreshing] = useState(false);
@@ -181,10 +185,10 @@ export function YoungAdultDashboard() {
             <button
               onClick={logout}
               className="shrink-0 rounded-lg bg-slate-900 px-2.5 py-1.5 text-xs font-semibold text-slate-300 transition-colors hover:bg-slate-800"
-              title="Sign out"
-              aria-label="Log out"
+              title={t("kid.signOut")}
+              aria-label={t("kid.logOut")}
             >
-              ⏻ <span className="hidden sm:inline">Logout</span>
+              ⏻ <span className="hidden sm:inline">{t("kid.logOut")}</span>
             </button>
           </div>
         </div>
@@ -209,7 +213,7 @@ export function YoungAdultDashboard() {
 
         {/* Pull refresh */}
         {pullRefreshing && (
-          <div className="text-center py-2 text-slate-600 text-xs animate-pulse">Refreshing…</div>
+          <div className="text-center py-2 text-slate-600 text-xs animate-pulse">{t("general.loading")}</div>
         )}
 
         {/* Progress summary — compact */}
@@ -276,8 +280,8 @@ export function YoungAdultDashboard() {
             >
               {pending.length === 0 && completed.length === 0 ? (
                 <div className="text-center py-16">
-                  <p className="text-slate-600 text-lg">No tasks assigned.</p>
-                  <p className="text-slate-700 text-sm mt-1">Enjoy your free time.</p>
+                  <p className="text-slate-600 text-lg">{t("kid.noTasksAssigned")}</p>
+                  <p className="text-slate-700 text-sm mt-1">{t("kid.enjoyFreeTimeShort")}</p>
                 </div>
               ) : (
                 <>
@@ -696,6 +700,8 @@ export function YoungAdultDashboard() {
           if (diff > 80 && window.scrollY < 10) handleRefresh();
         }}
       />
+
+      <KidSettings isOpen={showSettings} onClose={() => setShowSettings(false)} />
 
       {/* Timer overlay */}
       {activeTimer && (

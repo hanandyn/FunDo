@@ -1,10 +1,12 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import { api } from '../../lib/api';
 import * as audio from '../../lib/audio';
 import type { Tier1Task, PetState } from '../../lib/types';
 import { useVoicePrompt } from './useVoicePrompt';
+import { KidSettings } from './KidSettings';
 import { VoiceSettings } from './VoiceSettings';
 import { FamilyMessageBoard } from '../shared/FamilyMessageBoard';
 import { TaskVisual } from '../shared/TaskVisual';
@@ -34,6 +36,7 @@ function pseudo(seed: number, idx: number): number {
 }
 
 export function LittleExplorerDashboard() {
+  const { t } = useTranslation();
   const { user, logout } = useAuth();
   const { speak, speakGreeting } = useVoicePrompt();
   const [tasks, setTasks] = useState<Tier1Task[]>([]);
@@ -41,6 +44,7 @@ export function LittleExplorerDashboard() {
   const [completingId, setCompletingId] = useState<number | null>(null);
   const [showFireworks, setShowFireworks] = useState(false);
   const [showRewardShop, setShowRewardShop] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   const loadData = useCallback(async () => {
     try {
@@ -223,14 +227,24 @@ export function LittleExplorerDashboard() {
               )}
             </div>
           </div>
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            onClick={() => { speak('Bye bye!', 'greeting'); logout(); }}
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/15 text-xl text-white shadow-lg backdrop-blur hover:bg-white/25"
-            aria-label="Log out"
-          >
-            🚪
-          </motion.button>
+          <div className="flex gap-2">
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={() => { audio.playButtonClick(); setShowSettings(true); }}
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/15 text-xl text-white shadow-lg backdrop-blur hover:bg-white/25"
+              aria-label={t("kid.settings")}
+            >
+              ⚙️
+            </motion.button>
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={() => { speak('Bye bye!', 'greeting'); logout(); }}
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/15 text-xl text-white shadow-lg backdrop-blur hover:bg-white/25"
+              aria-label={t("kid.logOut")}
+            >
+              🚪
+            </motion.button>
+          </div>
         </div>
         <div className="grid min-w-0 grid-cols-[44px_minmax(72px,1fr)_auto] items-center gap-2">
           <VoiceSettings compact panelAlign="left" />
@@ -250,10 +264,10 @@ export function LittleExplorerDashboard() {
               setShowRewardShop(true);
             }}
             className="flex h-11 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-white/25 bg-white/25 px-3 py-2 text-white shadow-lg backdrop-blur hover:bg-white/35 sm:gap-2 sm:px-4"
-            aria-label="Open reward shop"
+            aria-label={t("kid.openRewardShop")}
           >
             <span className="text-xl">🎁</span>
-            <span className="text-lg font-bold drop-shadow">Shop</span>
+            <span className="text-lg font-bold drop-shadow">{t("kid.shop")}</span>
           </motion.button>
         </div>
       </header>
@@ -446,7 +460,7 @@ export function LittleExplorerDashboard() {
           <div className="bg-white/15 backdrop-blur rounded-3xl p-4">
             <div className="flex items-center gap-2 mb-3">
               <span className="text-3xl">📖</span>
-              <span className="text-xl font-bold text-white drop-shadow">Today&apos;s Stickers</span>
+              <span className="text-xl font-bold text-white drop-shadow">{t("kid.todaysStickers")}</span>
             </div>
             <div className="flex flex-wrap gap-2">
               {petState.stickers.map((sticker, i) => (
@@ -479,7 +493,7 @@ export function LittleExplorerDashboard() {
           <div className="flex items-center gap-3">
             <span className="shrink-0 text-4xl">🏺</span>
             <div className="min-w-0 flex-1">
-              <div className="mb-1 truncate whitespace-nowrap text-lg font-bold text-white">Star Jar</div>
+              <div className="mb-1 truncate whitespace-nowrap text-lg font-bold text-white">{t("kid.starJar")}</div>
               <div className="h-6 bg-white/20 rounded-full overflow-hidden">
                 <motion.div
                   className="h-full bg-yellow-400 rounded-full"
@@ -497,9 +511,9 @@ export function LittleExplorerDashboard() {
               setShowRewardShop(true);
             }}
             className="mt-4 min-h-[64px] w-full rounded-3xl border-2 border-white/30 bg-white/25 text-xl font-bold text-white shadow-lg hover:bg-white/35 sm:text-2xl"
-            aria-label="Open reward shop"
+            aria-label={t("kid.openRewardShop")}
           >
-            🎁 Reward Shop
+            🎁 {t("kid.rewardShop")}
           </motion.button>
         </motion.div>
       </div>
@@ -553,6 +567,8 @@ export function LittleExplorerDashboard() {
       <div className="safe-bottom relative z-10 mx-auto w-full max-w-[480px] px-3 pb-6 sm:max-w-[520px] sm:px-4">
         <FamilyMessageBoard compact />
       </div>
+
+      <KidSettings isOpen={showSettings} onClose={() => setShowSettings(false)} />
 
       <AnimatePresence>
         {showRewardShop && (

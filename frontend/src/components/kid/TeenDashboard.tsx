@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../../lib/api';
+import { KidSettings } from './KidSettings';
 import { useAuth } from '../../contexts/AuthContext';
 import type { TaskInstance, KidRecap, AllowanceStatus } from '../../lib/types';
 import { CountdownTimer } from '../timer/CountdownTimer';
@@ -19,6 +20,7 @@ export function TeenDashboard() {
   const [recap, setRecap] = useState<KidRecap | null>(null);
   const [allowance, setAllowance] = useState<AllowanceStatus | null>(null);
   const [activeView, setActiveView] = useState<ViewType>('tasks');
+  const [showSettings, setShowSettings] = useState(false);
   const [activeTimer, setActiveTimer] = useState<TaskInstance | null>(null);
   const [message, setMessage] = useState('');
   const [accentColor, setAccentColor] = useState(ACCENT_COLORS[0]);
@@ -573,6 +575,8 @@ export function TeenDashboard() {
           }
         }}
       />
+
+      <KidSettings isOpen={showSettings} onClose={() => setShowSettings(false)} />
 
       {/* Timer overlay for timed tasks */}
       {activeTimer && (

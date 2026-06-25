@@ -19,7 +19,8 @@ import { PowerUpShop } from './PowerUpShop';
 import { RewardShop } from './RewardShop';
 import { SchoolQuests } from './SchoolQuests';
 import { SeasonalBanner } from './SeasonalBanner';
-import { SettingsPanel } from '../settings/SettingsPanel';
+import { KidSettings } from './KidSettings';
+
 import { FamilyMessageBoard } from '../shared/FamilyMessageBoard';
 import { TaskVisual } from '../shared/TaskVisual';
 import { KidDailyRecap } from './KidDailyRecap';
@@ -305,8 +306,8 @@ export function KidQuestBoard() {
               <button
                 onClick={logout}
                 className="shrink-0 rounded-full bg-gray-100 px-2 py-1 text-xs font-bold text-gray-600 hover:bg-gray-200"
-                aria-label="Log out"
-                title="Log out"
+                aria-label={t("kid.logOut")}
+                title={t("kid.logOut")}
               >
                 🚪
               </button>
@@ -485,7 +486,7 @@ export function KidQuestBoard() {
             {/* In Progress */}
             {inProgressTasks.length > 0 && (
               <div>
-                <h3 className="text-lg font-bold mb-2 flex items-center gap-2">⏳ In Progress</h3>
+                <h3 className="text-lg font-bold mb-2 flex items-center gap-2">{t("kid.inProgress")}</h3>
                 {inProgressTasks.map(inst => (
                   <motion.div
                     key={inst.id}
@@ -496,13 +497,13 @@ export function KidQuestBoard() {
                     <div className="flex items-center justify-between">
                       <div>
                         <h4 className="font-bold text-lg">{inst.template?.name || 'Task'}</h4>
-                        <p className="text-sm text-gray-500">Timer running...</p>
+                        <p className="text-sm text-gray-500">{t("kid.timerRunning")}</p>
                       </div>
                       <button
                         onClick={() => setActiveTimer(inst)}
                         className="btn-primary"
                       >
-                        ⏱ View Timer
+                        {t("kid.viewTimer")}
                       </button>
                     </div>
                   </motion.div>
@@ -512,7 +513,7 @@ export function KidQuestBoard() {
 
             {/* Pending Tasks */}
             <h3 className="text-lg font-bold mb-2 flex items-center gap-2">
-              📋 Today's Quests ({pendingTasks.length})
+              📋 {t("kid.todaysQuestsCount", {count: pendingTasks.length})}
             </h3>
             {pendingTasks.length === 0 && completedTasks.length === 0 && (
               <motion.div
@@ -520,9 +521,9 @@ export function KidQuestBoard() {
                 animate={{ opacity: 1 }}
                 className="text-center py-12"
               >
-                <img src={emptyImg} alt="No quests" className="w-32 h-32 mx-auto mb-4 object-contain animate-float" />
-                <p className="text-xl text-gray-500">No quests for today!</p>
-                <p className="text-gray-400">Enjoy your free time, adventurer!</p>
+                <img src={emptyImg} alt={t("kid.noQuestsForToday")} className="w-32 h-32 mx-auto mb-4 object-contain animate-float" />
+                <p className="text-xl text-gray-500">{t("kid.noQuestsForToday")}</p>
+                <p className="text-gray-400">{t("kid.enjoyFreeTime")}</p>
               </motion.div>
             )}
             {pendingTasks.map(inst => {
@@ -571,7 +572,7 @@ export function KidQuestBoard() {
                         disabled={!canAct}
                         className={`text-base ${canAct ? 'btn-primary' : 'btn-quest bg-gray-200 text-gray-400 cursor-not-allowed'}`}
                       >
-                        ▶ Start
+                        {t("kid.start")}
                       </button>
                     ) : (
                       <button
@@ -579,7 +580,7 @@ export function KidQuestBoard() {
                         disabled={!canAct}
                         className={`text-base ${canAct ? 'btn-success' : 'btn-quest bg-gray-200 text-gray-400 cursor-not-allowed'}`}
                       >
-                        ✅ Done
+                        {t("kid.done")}
                       </button>
                     )}
                   </div>
@@ -592,7 +593,7 @@ export function KidQuestBoard() {
             {completedTasks.length > 0 && (
               <>
                 <h3 className="text-lg font-bold mb-2 flex items-center gap-2 mt-6">
-                  ✅ Completed ({completedTasks.length})
+                  ✅ {t("kid.completedCount", {count: completedTasks.length})}
                 </h3>
                 {completedTasks.slice(0, 10).map(inst => (
                   <motion.div
@@ -610,9 +611,9 @@ export function KidQuestBoard() {
                         <button
                           onClick={() => handleUndoTask(inst)}
                           className="text-xs px-2 py-1 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors focus-ring"
-                          title="Oops! Undo"
+                          title={t("kid.undo")}
                         >
-                          ↩️ Undo
+                          {t("kid.undo")}
                         </button>
                         <span className="text-2xl">✅</span>
                       </div>
@@ -636,7 +637,7 @@ export function KidQuestBoard() {
         {activeView === 'powerups' && <PowerUpShop />}
 
         {/* Settings View */}
-        {activeView === 'settings' && <SettingsPanel onClose={() => setActiveView('quests')} />}
+        {activeView === 'settings' && <KidSettings isOpen={true} onClose={() => setActiveView('quests')} />}
 
         {/* Leaderboard View */}
         {activeView === 'leaderboard' && <EnhancedLeaderboard />}

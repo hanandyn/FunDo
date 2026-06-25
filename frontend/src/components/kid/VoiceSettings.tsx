@@ -168,7 +168,7 @@ export function VoiceSettings({ compact = false, panelAlign = 'right' }: VoiceSe
               </p>
               {promptTypes.map((pt) => (
                 <div key={pt.type} className="flex items-center gap-2 mb-2">
-                  <span className="text-xs w-24 text-gray-600 truncate">{pt.label}</span>
+                  <span className="text-xs w-24 text-gray-600 truncate">{t(`voice.prompt.${pt.type}`, pt.label)}</span>
                   {settings.customPrompts[pt.type] ? (
                     <button
                       onClick={() => handlePlayCustom(pt.type)}
@@ -200,7 +200,7 @@ export function VoiceSettings({ compact = false, panelAlign = 'right' }: VoiceSe
               onClick={() => setShowSettings(false)}
               className="mt-3 w-full py-1.5 text-xs text-gray-400 hover:text-gray-600 transition-colors"
             >
-              ✕ Close
+              ✕ {t("common.close")}
             </button>
           </motion.div>
         )}
