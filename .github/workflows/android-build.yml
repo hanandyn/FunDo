@@ -38,13 +38,23 @@ jobs:
       - name: Sync Capacitor native project
         run: npm run native:sync
 
-      - name: Build debug APK
+      - name: Decode release keystore
         working-directory: frontend/android
-        run: ./gradlew assembleDebug
+        run: |
+          echo "${{ secrets.FUNDO_RELEASE_KEYSTORE_BASE64 }}" | base64 -d > fundo-release.keystore
+
+      - name: Build release APK
+        working-directory: frontend/android
+        env:
+          FUND_RELEASE_STORE_FILE: ${{ github.workspace }}/frontend/android/fundo-release.keystore
+          FUND_RELEASE_STORE_PASSWORD: ${{ secrets.FUNDO_RELEASE_STORE_PASSWORD }}
+          FUND_RELEASE_KEY_ALIAS: ${{ secrets.FUNDO_RELEASE_KEY_ALIAS }}
+          FUND_RELEASE_KEY_PASSWORD: ${{ secrets.FUNDO_RELEASE_KEY_PASSWORD }}
+        run: ./gradlew assembleRelease
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: fundo-android-debug
-          path: frontend/android/app/build/outputs/apk/debug/app-debug.apk
+          name: fundo-android-release
+          path: frontend/android/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
