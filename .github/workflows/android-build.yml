@@ -60,9 +60,9 @@ jobs:
         working-directory: frontend/android
         env:
           FUND_RELEASE_STORE_FILE: ${{ github.workspace }}/frontend/android/fundo-release.keystore
-          FUND_RELEASE_STORE_PASSWORD: *** secrets.FUNDO_RELEASE_STORE_PASSWORD }}
+          FUND_RELEASE_STORE_PASSWORD: ${{ secrets.FUNDO_RELEASE_STORE_PASSWORD }}
           FUND_RELEASE_KEY_ALIAS: ${{ secrets.FUNDO_RELEASE_KEY_ALIAS }}
-          FUND_RELEASE_KEY_PASSWORD: *** secrets.FUNDO_RELEASE_KEY_PASSWORD }}
+          FUND_RELEASE_KEY_PASSWORD: ${{ secrets.FUNDO_RELEASE_KEY_PASSWORD }}
         run: |
           ./gradlew assembleRelease --stacktrace > /tmp/gradle.log 2>&1 || {
             echo "=== GRADLE BUILD FAILED ==="
